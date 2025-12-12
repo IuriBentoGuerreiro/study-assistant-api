@@ -1,8 +1,10 @@
 package com.ibgs.studyAssistant.auth.model;
 
+import com.ibgs.studyAssistant.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,17 +13,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class User implements UserDetails {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "username", unique = true, nullable = false)
     private String username;
