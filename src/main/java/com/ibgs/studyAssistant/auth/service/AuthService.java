@@ -4,19 +4,25 @@ import com.ibgs.studyAssistant.auth.enuns.RoleName;
 import com.ibgs.studyAssistant.auth.model.Role;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.utils.JwtUtil;
+import com.ibgs.studyAssistant.exception.InvalidTokenException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.time.Duration;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final RoleService roleService;
@@ -24,37 +30,31 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService userDetailsService;
 
-    public AuthService(
-            RoleService roleService,
-            PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
-            UserService userService,
-            JwtUtil jwtUtil,
-            CustomUserDetailsService userDetailsService
+    public ResponseEntity<Void> login(
+            User user,
+            HttpServletResponse response
     ) {
-        this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-    }
-
-    public ResponseEntity<Map<String, String>> login(User user) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
-
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+                new UsernamePasswordAuthenticationToken(
+                        user.getUsername(),
+                        user.getPassword()
+                )
         );
 
-        String token = jwtUtil.generateToken(userDetails.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername());
 
-        Map<String, String> response = new HashMap<>();
-        response.put("token", token);
+        ResponseCookie cookie = ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofHours(2))
+                .build();
 
-        return ResponseEntity.ok(response);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok().build();
     }
 
     public User register(User user) {
@@ -68,5 +68,49 @@ public class AuthService {
         User newUser = new User(user.getUsername(), encryptedPassword, roles);
 
         return userService.save(newUser);
+    }
+
+    public User getCurrentUser(HttpServletRequest request) {
+        String token = extractTokenFromCookie(request);
+
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        if (token == null) {
+            throw new InvalidTokenException("Token não encontrado");
+        }
+
+        try {
+            String username = jwtUtil.extractUsername(token);
+
+            if (!jwtUtil.validateToken(token, username)) {
+                throw new InvalidTokenException("Token inválido ou expirado");
+            }
+
+            return userService.findByUsername(username);
+
+        } catch (InvalidTokenException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InvalidTokenException("Token inválido", e);
+        }
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }

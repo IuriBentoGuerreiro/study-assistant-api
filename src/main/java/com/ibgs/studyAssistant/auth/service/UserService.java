@@ -21,4 +21,11 @@ public class UserService {
                 () -> new EntityNotFoundException("Usuário Não Encontrado")
         );
     }
+
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new EntityNotFoundException("Usuário Não Encontrado")
+        );
+    }
+
 }
