@@ -46,9 +46,6 @@ public class AuthService {
                 );
 
         User user = (User) authentication.getPrincipal();
-
-        assert user != null;
-
         String token = jwtUtil.generateToken(user.getUsername());
 
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
@@ -63,7 +60,6 @@ public class AuthService {
 
         return ResponseEntity.ok().build();
     }
-
     public User register(User user) {
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
 
