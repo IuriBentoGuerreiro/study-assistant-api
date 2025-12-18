@@ -51,7 +51,6 @@ public class AuthService {
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofHours(2))
                 .build();
