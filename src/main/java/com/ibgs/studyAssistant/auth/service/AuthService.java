@@ -55,6 +55,7 @@ public class AuthService {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
+                .domain(".study-assistant-app-eight.vercel.app")
                 .path("/")
                 .maxAge(Duration.ofHours(2))
                 .build();
