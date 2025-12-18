@@ -1,8 +1,9 @@
 package com.ibgs.studyAssistant.auth.controller;
 
+import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
+import com.ibgs.studyAssistant.auth.dto.LoginRequest;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,10 +23,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(
-            @RequestBody @Valid User user,
+            @RequestBody @Valid LoginRequest loginRequest,
             HttpServletResponse response
     ) {
-        authService.login(user, response);
+        authService.login(loginRequest, response);
         return ResponseEntity.ok().build();
     }
 
@@ -33,12 +34,13 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody @Valid User user) {
         User userSave = authService.register(user);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSave);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(HttpServletRequest request) {
-        User user = authService.getCurrentUser(request);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<AuthMeResponse> me() {
+        AuthMeResponse authMeResponse = authService.getCurrentUser();
+        return ResponseEntity.ok().body(authMeResponse);
     }
+
 }

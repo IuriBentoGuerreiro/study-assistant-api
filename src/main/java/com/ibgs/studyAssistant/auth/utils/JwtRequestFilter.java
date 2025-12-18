@@ -23,11 +23,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    // ✅ Rotas públicas que não precisam de autenticação
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
             "/auth/login",
             "/auth/register",
-            "/auth/me",
             "/swagger-ui",
             "/v3/api-docs"
     );
@@ -77,6 +75,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        System.out.println("DEBUG: principal = " + userDetails.getClass());
+
 
         filterChain.doFilter(request, response);
     }

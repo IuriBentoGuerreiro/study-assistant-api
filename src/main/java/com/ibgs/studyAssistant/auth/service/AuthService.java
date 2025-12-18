@@ -1,12 +1,12 @@
 package com.ibgs.studyAssistant.auth.service;
 
+import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
+import com.ibgs.studyAssistant.auth.dto.LoginRequest;
 import com.ibgs.studyAssistant.auth.enuns.RoleName;
 import com.ibgs.studyAssistant.auth.model.Role;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.utils.JwtUtil;
 import com.ibgs.studyAssistant.exception.InvalidTokenException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -14,11 +14,13 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -32,15 +34,20 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public ResponseEntity<Void> login(
-            User user,
+            LoginRequest request,
             HttpServletResponse response
     ) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getUsername(),
-                        user.getPassword()
-                )
-        );
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.username(),
+                                request.password()
+                        )
+                );
+
+        User user = (User) authentication.getPrincipal();
+
+        assert user != null;
 
         String token = jwtUtil.generateToken(user.getUsername());
 
@@ -62,55 +69,38 @@ public class AuthService {
 
         Role userRole = roleService.findByname(RoleName.ROLE_USER);
 
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
+        Set<Role> roles = Set.of(userRole);
 
-        User newUser = new User(user.getUsername(), encryptedPassword, roles);
+        User newUser = new User(
+                user.getUsername(),
+                encryptedPassword,
+                roles
+        );
 
         return userService.save(newUser);
     }
 
-    public User getCurrentUser(HttpServletRequest request) {
-        String token = extractTokenFromCookie(request);
+    public AuthMeResponse getCurrentUser() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
-        if (token == null) {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring(7);
-            }
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new InvalidTokenException("Usuário não autenticado");
         }
 
-        if (token == null) {
-            throw new InvalidTokenException("Token não encontrado");
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof User user)) {
+            throw new InvalidTokenException("Principal inválido");
         }
 
-        try {
-            String username = jwtUtil.extractUsername(token);
-
-            if (!jwtUtil.validateToken(token, username)) {
-                throw new InvalidTokenException("Token inválido ou expirado");
-            }
-
-            return userService.findByUsername(username);
-
-        } catch (InvalidTokenException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InvalidTokenException("Token inválido", e);
-        }
-    }
-
-    private String extractTokenFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("access_token".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-
-        return null;
+        return new AuthMeResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()
+        );
     }
 }
