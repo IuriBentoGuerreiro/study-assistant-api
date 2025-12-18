@@ -61,7 +61,8 @@ public class WebSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "https://study-assistant-app-eight.vercel.app"
         ));
 
         configuration.setAllowCredentials(true);
