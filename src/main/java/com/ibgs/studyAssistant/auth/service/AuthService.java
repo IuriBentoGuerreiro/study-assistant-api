@@ -2,15 +2,13 @@ package com.ibgs.studyAssistant.auth.service;
 
 import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
 import com.ibgs.studyAssistant.auth.dto.LoginRequest;
+import com.ibgs.studyAssistant.auth.dto.LoginResponse;
 import com.ibgs.studyAssistant.auth.enuns.RoleName;
 import com.ibgs.studyAssistant.auth.model.Role;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.utils.JwtUtil;
 import com.ibgs.studyAssistant.exception.InvalidTokenException;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Set;
 
 @Service
@@ -33,10 +30,8 @@ public class AuthService {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    public ResponseEntity<Void> login(
-            LoginRequest request,
-            HttpServletResponse response
-    ) {
+    public ResponseEntity<LoginResponse> login(LoginRequest request) {
+
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -48,18 +43,9 @@ public class AuthService {
         User user = (User) authentication.getPrincipal();
         String token = jwtUtil.generateToken(user.getUsername());
 
-        ResponseCookie cookie = ResponseCookie.from("access_token", token)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(Duration.ofHours(2))
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new LoginResponse(token));
     }
+
     public User register(User user) {
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
 

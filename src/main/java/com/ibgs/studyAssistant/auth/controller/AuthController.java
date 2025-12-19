@@ -2,6 +2,7 @@ package com.ibgs.studyAssistant.auth.controller;
 
 import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
 import com.ibgs.studyAssistant.auth.dto.LoginRequest;
+import com.ibgs.studyAssistant.auth.dto.LoginResponse;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,14 +23,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
-            @RequestBody @Valid LoginRequest loginRequest,
-            HttpServletResponse response
-    ) {
-        authService.login(loginRequest, response);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
-
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody @Valid User user) {
