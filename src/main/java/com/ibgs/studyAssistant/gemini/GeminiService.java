@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Service
 public class GeminiService {
 
-    private final WebClient webClient;
+    private final RestClient restClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${gemini.api.key}")
@@ -56,9 +56,10 @@ public class GeminiService {
         ]
         """;
 
-    public GeminiService(WebClient.Builder builder) {
-        this.webClient = builder
+    public GeminiService(RestClient.Builder builder) {
+        this.restClient = builder
                 .baseUrl("https://generativelanguage.googleapis.com")
+                .defaultHeader("Content-Type", "application/json")
                 .build();
     }
 
@@ -69,17 +70,11 @@ public class GeminiService {
 
         try {
             List<QuestionGenerateDTO> questions =
-                    objectMapper.readValue(
-                            json,
-                            new TypeReference<>() {
-                            }
-                    );
+                    objectMapper.readValue(json, new TypeReference<>() {});
 
             questions.forEach(q -> {
                 if (q.options() == null || q.options().size() != 4) {
-                    throw new RuntimeException(
-                            "Questão inválida (não possui 4 alternativas): " + q
-                    );
+                    throw new RuntimeException("Questão inválida: " + q);
                 }
             });
 
@@ -91,41 +86,39 @@ public class GeminiService {
     }
 
     private String callGemini(String prompt) {
-
         int tentativas = 0;
 
         while (tentativas < 3) {
             try {
                 return doCall(prompt);
-            } catch (WebClientResponseException.TooManyRequests e) {
+            } catch (HttpClientErrorException.TooManyRequests e) {
                 tentativas++;
                 try {
-                    Thread.sleep(2000L * tentativas); // backoff progressivo
+                    Thread.sleep(2000L * tentativas);
                 } catch (InterruptedException ignored) {}
             }
         }
 
-        throw new RuntimeException("Limite da API Gemini atingido. Tente novamente em alguns segundos.");
+        throw new RuntimeException("Limite da API Gemini atingido.");
     }
 
     private String doCall(String prompt) {
+
         Map<String, Object> body = Map.of(
                 "contents", List.of(
                         Map.of("parts", List.of(Map.of("text", prompt)))
                 )
         );
 
-        String response = webClient.post()
+        String response = restClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1beta/models/gemini-2.5-flash:generateContent")
                         .queryParam("key", apiKey)
                         .build()
                 )
-                .header("Content-Type", "application/json")
-                .bodyValue(body)
+                .body(body)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                .body(String.class);
 
         return extractText(response);
     }
@@ -148,12 +141,4 @@ public class GeminiService {
             throw new RuntimeException("Erro ao processar resposta do Gemini", e);
         }
     }
-
-    private String sanitizeJson(String text) {
-        return text
-                .replaceAll("```json", "")
-                .replaceAll("```", "")
-                .trim();
-    }
-
 }

@@ -1,7 +1,6 @@
 package com.ibgs.studyAssistant.gemini;
 
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
-import com.ibgs.studyAssistant.dto.QuestionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

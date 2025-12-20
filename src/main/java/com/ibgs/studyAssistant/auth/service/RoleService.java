@@ -3,9 +3,9 @@ package com.ibgs.studyAssistant.auth.service;
 import com.ibgs.studyAssistant.auth.enuns.RoleName;
 import com.ibgs.studyAssistant.auth.model.Role;
 import com.ibgs.studyAssistant.auth.repository.RoleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -15,7 +15,7 @@ public class RoleService {
 
     public Role findByname(RoleName roleName){
         return roleRepository.findByRoleName(roleName).orElseThrow(
-                ()-> new NotFoundException("Not found")
+                ()-> new EntityNotFoundException("Not found")
         );
     }
 }
