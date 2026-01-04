@@ -21,6 +21,11 @@ public class StudySessionService {
     private final UserService userService;
 
     @Transactional
+    public List<StudySession> findAllByUser(Integer userId){
+        return studySessionRepository.findByUserId(userId);
+    }
+
+    @Transactional
     public StudySession criarSessaoComQuestoes(
             Integer userId,
             List<QuestionGenerateDTO> questoesGeradas
@@ -60,6 +65,7 @@ public class StudySessionService {
                     entity.setStatement(q.statement());
                     entity.setOptions(q.options());
                     entity.setStudySession(session);
+                    entity.setCorrectAnswerIndex(q.correctAnswerIndex());
 
                     return entity;
                 })
@@ -71,4 +77,3 @@ public class StudySessionService {
     }
 
 }
-

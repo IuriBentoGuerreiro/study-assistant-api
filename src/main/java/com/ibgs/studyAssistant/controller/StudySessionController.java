@@ -17,6 +17,13 @@ public class StudySessionController {
 
     private final StudySessionService studySessionService;
 
+    @GetMapping("/userId")
+    public ResponseEntity<List<StudySession>> findAllByUser(@PathVariable Integer userId){
+        List<StudySession>  studySessions =  studySessionService.findAllByUser(userId);
+
+        return ResponseEntity.ok().body(studySessions);
+    }
+
     @PostMapping
     public ResponseEntity<StudySession> criarSessao(
             @RequestParam Integer userId,
