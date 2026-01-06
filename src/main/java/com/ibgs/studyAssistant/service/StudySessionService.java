@@ -4,6 +4,7 @@ import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.domain.Question;
 import com.ibgs.studyAssistant.domain.StudySession;
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
+import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
 import com.ibgs.studyAssistant.gemini.GeminiService;
 import com.ibgs.studyAssistant.repository.StudySessionRepository;
 import jakarta.transaction.Transactional;
@@ -22,8 +23,8 @@ public class StudySessionService {
     private final UserService userService;
 
     @Transactional
-    public List<StudySession> findAllByUser(Integer userId){
-        return studySessionRepository.findByUserId(userId);
+    public List<StudySessionNameDTO> findAllSessionNameByUser(Integer userId){
+        return studySessionRepository.findSessionNameByUserId(userId);
     }
 
     @Transactional

@@ -2,6 +2,7 @@ package com.ibgs.studyAssistant.controller;
 
 import com.ibgs.studyAssistant.domain.StudySession;
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
+import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
 import com.ibgs.studyAssistant.service.StudySessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,8 +19,8 @@ public class StudySessionController {
     private final StudySessionService studySessionService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<StudySession>> findAllByUser(@PathVariable Integer userId){
-        List<StudySession>  studySessions =  studySessionService.findAllByUser(userId);
+    public ResponseEntity<List<StudySessionNameDTO>> findAllByUser(@PathVariable Integer userId){
+        List<StudySessionNameDTO>  studySessions =  studySessionService.findAllSessionNameByUser(userId);
 
         return ResponseEntity.ok().body(studySessions);
     }
