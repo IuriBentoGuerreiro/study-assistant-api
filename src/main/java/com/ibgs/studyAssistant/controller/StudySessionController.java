@@ -17,7 +17,7 @@ public class StudySessionController {
 
     private final StudySessionService studySessionService;
 
-    @GetMapping("/userId")
+    @GetMapping("/{userId}")
     public ResponseEntity<List<StudySession>> findAllByUser(@PathVariable Integer userId){
         List<StudySession>  studySessions =  studySessionService.findAllByUser(userId);
 

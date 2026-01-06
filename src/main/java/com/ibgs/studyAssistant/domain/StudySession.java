@@ -25,6 +25,9 @@ public class StudySession extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "session_name")
+    private String sessionName;
+
     @OneToMany(mappedBy = "studySession", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions = new ArrayList<>();
 

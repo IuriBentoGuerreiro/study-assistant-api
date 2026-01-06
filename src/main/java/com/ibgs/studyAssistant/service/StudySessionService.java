@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -55,7 +56,11 @@ public class StudySessionService {
                 geminiService.generateQuestions(prompt);
 
         StudySession session = new StudySession();
+
+        session.setSessionName(generateSessionName(prompt));
+
         session.setUser(userService.findById(userId));
+
 
         List<Question> questions = generated.stream().map(questionGenerateDTO -> {
 
@@ -76,4 +81,50 @@ public class StudySessionService {
         return studySessionRepository.save(session);
     }
 
+    private String generateSessionName(String prompt) {
+        if (prompt == null || prompt.isBlank()) {
+            return "Nova sessão de estudo";
+        }
+
+        String extracted = extractPromptIfJson(prompt);
+
+        if (extracted.isBlank()) {
+            return "Nova sessão de estudo";
+        }
+
+        String cleaned = extracted
+                .trim()
+                .replaceAll("\\s+", " ")
+                .replaceAll("[\\r\\n{}\"]", "");
+
+        String[] words = cleaned.split(" ");
+
+        String title = words.length <= 6
+                ? cleaned
+                : String.join(" ", Arrays.copyOfRange(words, 0, 6));
+
+        return capitalize(title);
+    }
+
+    private String extractPromptIfJson(String input) {
+        input = input.trim();
+
+        if (input.startsWith("{") && input.endsWith("}")) {
+            int idx = input.indexOf("\"prompt\"");
+            if (idx != -1) {
+                int start = input.indexOf(":", idx) + 1;
+                int end = input.lastIndexOf("\"");
+                if (start > 0 && end > start) {
+                    return input.substring(start, end).replaceAll("\"", "").trim();
+                }
+            }
+            return "";
+        }
+
+        return input;
+    }
+
+    private String capitalize(String text) {
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
 }
