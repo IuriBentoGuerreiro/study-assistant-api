@@ -21,18 +21,17 @@ public class Question extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String statement;
 
+    @Column(name = "study_answer")
+    private Integer studyAnswer;
+
+    @Column(name = "correct_answer_index")
+    private Integer correctAnswerIndex;
+
     @ElementCollection
     private List<String> options;
-
-    private Integer correctAnswerIndex;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "study_session_id")
     private StudySession studySession;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "study_answer_id")
-    private StudyAnswer studyAnswer;
 }
