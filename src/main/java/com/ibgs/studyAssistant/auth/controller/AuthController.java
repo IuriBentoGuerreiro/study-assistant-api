@@ -5,7 +5,6 @@ import com.ibgs.studyAssistant.auth.dto.LoginRequest;
 import com.ibgs.studyAssistant.auth.dto.LoginResponse;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.service.AuthService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

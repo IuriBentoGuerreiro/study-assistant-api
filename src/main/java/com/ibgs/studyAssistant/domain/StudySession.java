@@ -30,5 +30,4 @@ public class StudySession extends BaseEntity {
 
     @OneToMany(mappedBy = "studySession", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions = new ArrayList<>();
-
 }
