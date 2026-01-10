@@ -28,6 +28,13 @@ public class StudySessionService {
     }
 
     @Transactional
+    public StudySession findById(Integer id){
+        return studySessionRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Recurso Não Encontrado")
+        );
+    }
+
+    @Transactional
     public StudySession criarSessaoComQuestoes(
             Integer userId,
             List<QuestionGenerateDTO> questoesGeradas
