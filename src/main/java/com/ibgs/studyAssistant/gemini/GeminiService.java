@@ -22,39 +22,39 @@ public class GeminiService {
     private String apiKey;
 
     private static final String PROMPT_GENERATE = """
-        Você é um assistente de estudos especializado em concursos públicos.
-        
-        Gere exatamente 10 questões de múltipla escolha com base no conteúdo fornecido.
-        
-        Regras:
-        - Cada questão deve conter:
-          - statement (a pergunta)
-          - options (4 alternativas)
-          - correctAnswerIndex (índice da resposta correta como número inteiro de 0 a 3)
-        - A alternativa correta deve estar em correctAnswerIndex (0 = primeira alternativa, 1 = segunda, 2 = terceira, 3 = quarta)
-        - Retorne APENAS um JSON válido
-        - NÃO use Markdown
-        - NÃO inclua texto fora do JSON
-        - Sempre em português do Brasil
-        
-        Formato obrigatório:
-        [
-          {
-            "statement": "Pergunta aqui?",
-            "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
-            "correctAnswerIndex": 1
-          }
-        ]
-        
-        Exemplo:
-        [
-          {
-            "statement": "Qual é a capital do Brasil?",
-            "options": ["(A) São Paulo", "(B) Brasília", "(C) Rio de Janeiro", "(D) Salvador"],
-            "correctAnswerIndex": 1
-          }
-        ]
-        """;
+    Você é um assistente de estudos especializado em concursos públicos da banca {banca}.
+    
+    Gere exatamente {quantidade} questões de múltipla escolha com base no conteúdo fornecido.
+    
+    Regras:
+    - Cada questão deve conter:
+      - statement (a pergunta)
+      - options (4 alternativas)
+      - correctAnswerIndex (índice da resposta correta como número inteiro de 0 a 3)
+    - A alternativa correta deve estar em correctAnswerIndex (0 = primeira alternativa, 1 = segunda, 2 = terceira, 3 = quarta)
+    - Retorne APENAS um JSON válido
+    - NÃO use Markdown
+    - NÃO inclua texto fora do JSON
+    - Sempre em português do Brasil
+    
+    Formato obrigatório:
+    [
+      {
+        "statement": "Pergunta aqui?",
+        "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
+        "correctAnswerIndex": 1
+      }
+    ]
+    
+    Exemplo:
+    [
+      {
+        "statement": "Qual é a capital do Brasil?",
+        "options": ["(A) São Paulo", "(B) Brasília", "(C) Rio de Janeiro", "(D) Salvador"],
+        "correctAnswerIndex": 1
+      }
+    ]
+    """;
 
     public GeminiService(RestClient.Builder builder) {
         this.restClient = builder
@@ -63,9 +63,13 @@ public class GeminiService {
                 .build();
     }
 
-    public List<QuestionGenerateDTO> generateQuestions(String promptUser) {
+    public List<QuestionGenerateDTO> generateQuestions(String promptUser, String banca, int quantidade) {
 
-        String promptFinal = PROMPT_GENERATE + "\n\nConteúdo base:\n" + promptUser;
+        String promptFinal = PROMPT_GENERATE
+                .replace("{banca}", banca)
+                .replace("{quantidade}", String.valueOf(quantidade))
+                + "\n\nConteúdo base:\n" + promptUser;
+
         String json = callGemini(promptFinal);
 
         try {

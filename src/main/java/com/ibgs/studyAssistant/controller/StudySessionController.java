@@ -41,10 +41,12 @@ public class StudySessionController {
     @PostMapping("/generateIa")
     public ResponseEntity<StudySession> gerarSessaoComIA(
             @RequestParam Integer userId,
-            @RequestBody String prompt
+            @RequestBody String prompt,
+            @RequestParam String banca,
+            @RequestParam int quantidade
     ) {
         StudySession session =
-                studySessionService.criarSessaoComIA(userId, prompt);
+                studySessionService.criarSessaoComIA(userId, prompt, banca, quantidade);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

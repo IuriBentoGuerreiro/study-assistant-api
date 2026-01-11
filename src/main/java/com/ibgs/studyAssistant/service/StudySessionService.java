@@ -58,10 +58,10 @@ public class StudySessionService {
     }
 
     @Transactional
-    public StudySession criarSessaoComIA(Integer userId, String prompt) {
+    public StudySession criarSessaoComIA(Integer userId, String prompt, String banca, int quantidade) {
 
         List<QuestionGenerateDTO> generated =
-                geminiService.generateQuestions(prompt);
+                geminiService.generateQuestions(prompt, banca, quantidade);
 
         StudySession session = new StudySession();
 
