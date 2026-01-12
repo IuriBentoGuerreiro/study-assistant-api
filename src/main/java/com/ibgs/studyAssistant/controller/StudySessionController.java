@@ -1,7 +1,6 @@
 package com.ibgs.studyAssistant.controller;
 
 import com.ibgs.studyAssistant.domain.StudySession;
-import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
 import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
 import com.ibgs.studyAssistant.service.StudySessionService;
 import lombok.RequiredArgsConstructor;
@@ -25,28 +24,15 @@ public class StudySessionController {
         return ResponseEntity.ok().body(studySessions);
     }
 
-    @PostMapping
-    public ResponseEntity<StudySession> criarSessao(
-            @RequestParam Integer userId,
-            @RequestBody List<QuestionGenerateDTO> questoes
-    ) {
-        StudySession session = studySessionService
-                .criarSessaoComQuestoes(userId, questoes);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(session);
-    }
-
     @PostMapping("/generateIa")
-    public ResponseEntity<StudySession> gerarSessaoComIA(
+    public ResponseEntity<StudySession> generateSession(
             @RequestParam Integer userId,
             @RequestBody String prompt,
             @RequestParam String banca,
             @RequestParam int quantidade
     ) {
         StudySession session =
-                studySessionService.criarSessaoComIA(userId, prompt, banca, quantidade);
+                studySessionService.generateSession(userId, prompt, banca, quantidade);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

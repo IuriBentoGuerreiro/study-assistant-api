@@ -35,30 +35,7 @@ public class StudySessionService {
     }
 
     @Transactional
-    public StudySession criarSessaoComQuestoes(
-            Integer userId,
-            List<QuestionGenerateDTO> questoesGeradas
-    ) {
-        StudySession session = new StudySession();
-        session.setUser(userService.findById(userId));
-
-        List<Question> questions = questoesGeradas.stream()
-                .map(dto -> {
-                    Question q = new Question();
-                    q.setStatement(dto.statement());
-                    q.setOptions(dto.options());
-                    q.setStudySession(session);
-                    return q;
-                })
-                .toList();
-
-        session.setQuestions(questions);
-
-        return studySessionRepository.save(session);
-    }
-
-    @Transactional
-    public StudySession criarSessaoComIA(Integer userId, String prompt, String banca, int quantidade) {
+    public StudySession generateSession(Integer userId, String prompt, String banca, int quantidade) {
 
         List<QuestionGenerateDTO> generated =
                 geminiService.generateQuestions(prompt, banca, quantidade);

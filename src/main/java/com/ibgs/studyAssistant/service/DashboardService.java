@@ -4,6 +4,7 @@ import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
 import com.ibgs.studyAssistant.auth.service.AuthService;
 import com.ibgs.studyAssistant.dto.DashboardDTO;
 import com.ibgs.studyAssistant.repository.QuestionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ public class DashboardService {
     private final AuthService authService;
     private final QuestionRepository questionRepository;
 
+    @Transactional
     public DashboardDTO dashboard() {
 
         AuthMeResponse user = authService.getCurrentUser();

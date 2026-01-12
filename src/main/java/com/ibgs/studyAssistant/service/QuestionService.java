@@ -2,7 +2,6 @@ package com.ibgs.studyAssistant.service;
 
 import com.ibgs.studyAssistant.domain.Question;
 import com.ibgs.studyAssistant.domain.StudySession;
-import com.ibgs.studyAssistant.dto.QuestionResponse;
 import com.ibgs.studyAssistant.dto.UserAnswerDTO;
 import com.ibgs.studyAssistant.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
