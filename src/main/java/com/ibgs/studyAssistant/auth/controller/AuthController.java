@@ -3,6 +3,7 @@ package com.ibgs.studyAssistant.auth.controller;
 import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
 import com.ibgs.studyAssistant.auth.dto.LoginRequest;
 import com.ibgs.studyAssistant.auth.dto.LoginResponse;
+import com.ibgs.studyAssistant.auth.dto.RefreshTokenRequest;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -30,6 +31,11 @@ public class AuthController {
     public ResponseEntity<User> register(@RequestBody @Valid User user) {
         User userSave = authService.register(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(userSave);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<LoginResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        return authService.refreshToken(request);
     }
 
     @GetMapping("/me")

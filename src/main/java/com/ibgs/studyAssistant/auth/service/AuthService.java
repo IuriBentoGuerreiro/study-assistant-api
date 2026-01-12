@@ -3,6 +3,7 @@ package com.ibgs.studyAssistant.auth.service;
 import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
 import com.ibgs.studyAssistant.auth.dto.LoginRequest;
 import com.ibgs.studyAssistant.auth.dto.LoginResponse;
+import com.ibgs.studyAssistant.auth.dto.RefreshTokenRequest;
 import com.ibgs.studyAssistant.auth.enuns.RoleName;
 import com.ibgs.studyAssistant.auth.model.Role;
 import com.ibgs.studyAssistant.auth.model.User;
@@ -41,10 +42,15 @@ public class AuthService {
                 );
 
         User user = (User) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(user.getUsername());
 
-        return ResponseEntity.ok(new LoginResponse(token));
-    }
+        assert user != null;
+
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+
+        return ResponseEntity.ok(
+                new LoginResponse(accessToken, refreshToken)
+        );    }
 
     public User register(User user) {
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
@@ -60,6 +66,26 @@ public class AuthService {
         );
 
         return userService.save(newUser);
+    }
+
+    public ResponseEntity<LoginResponse> refreshToken(RefreshTokenRequest request) {
+
+        String refreshToken = request.refreshToken();
+
+        if (!jwtUtil.validateRefreshToken(refreshToken)) {
+            throw new InvalidTokenException("Refresh token inválido ou expirado");
+        }
+
+        String username = jwtUtil.extractUsername(refreshToken);
+
+        User user = userService.findByUsername(username);
+
+        String newAccessToken = jwtUtil.generateAccessToken(username);
+        String newRefreshToken = jwtUtil.generateRefreshToken(username);
+
+        return ResponseEntity.ok(
+                new LoginResponse(newAccessToken, newRefreshToken)
+        );
     }
 
     public AuthMeResponse getCurrentUser() {

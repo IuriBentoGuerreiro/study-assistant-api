@@ -2,7 +2,6 @@ package com.ibgs.studyAssistant.auth.utils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -26,6 +24,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_PATHS = List.of(
             "/auth/login",
             "/auth/register",
+            "/auth/refresh-token",
             "/swagger-ui",
             "/v3/api-docs"
     );
@@ -63,7 +62,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     UserDetails userDetails =
                             userDetailsService.loadUserByUsername(username);
 
-                    if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+                    if (jwtUtil.validateAccessToken(jwt, userDetails.getUsername())) {
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(
                                         userDetails,
