@@ -1,145 +1,81 @@
-📚 Assistente de Estudo para Concursos (AI Study Assistant)
+# 📚 BrainlyAI
 
-O Assistente de Estudo para Concursos é uma aplicação web que utiliza inteligência artificial para transformar materiais de estudo em conteúdos dinâmicos e personalizados.
-O usuário envia arquivos PDF, e a IA gera automaticamente:
-
-📝 Resumos inteligentes
-
-❓ Questões simuladas (objetivas e discursivas)
-
-🗂️ Fichas de revisão (flashcards)
-
-🧠 Mapas mentais automáticos
-
-🔍 Insights sobre tópicos mais cobrados
-
-O objetivo é acelerar e melhorar o processo de estudo para concursos públicos, ENEM e certificações.
-
-
-
+**BrainlyAI** é uma aplicação web que utiliza **inteligência artificial** para transformar materiais de estudo em conteúdos **dinâmicos e personalizados**.  
+O usuário envia um prompt, e a IA gera automaticamente **questões simuladas**
+ 
+O objetivo é **acelerar e melhorar o processo de estudo** para concursos públicos, ENEM e certificações.
 
 🚀 Funcionalidades
-📄 Upload de PDFs
 
-Aceita arquivos PDF de apostilas, leis, editais, resumos e slides.
+## 📄 Geração de questões
 
-🤖 Resumos automatizados
+O usuário pode inserir a **quantidade de questões desejadas** e até mesmo a **banca organizadora** do concurso, para que as questões geradas sejam semelhantes às que aparecem nas provas dessa banca.  
 
-Resumos curtos, médios ou detalhados
+Após isso, basta enviar o **prompt** e as questões serão geradas automaticamente. Você também pode copiar o conteúdo de um **PDF de estudo** e colar no campo de prompt; as questões serão geradas a partir das informações recebidas.
 
-Organização por capítulos e tópicos
-
-Explicações simplificadas para temas complexos
-
-
-
-
-🎯 Questões simuladas
-
-Gera:
-
-Questões de múltipla escolha
-
-Questões discursivas
-
-Gabarito e explicação
-
-Estatísticas de dificuldade
+**Exemplo:**
+```text
+Banca: FGV
+Quantidade: 10
+Prompt: Regência Verbal e Nominal
+```
 
 
-
-
-🧩 Flashcards inteligentes
-
-Criação automática de cartões com:
-
-Pergunta
-
-Resposta
-
-Dicas de memorização
-
-Repetição espaçada (SRS)
-
-
-
-
-🧠 Mapas mentais
-
-Geração visual (baseada em IA) com:
-
-Tópicos
-
-Subtópicos
-
-Ligações lógicas
-
-Sugestões de ordem de estudo
-
-
-
-
-📊 Painel de análise
+## 📊 Painel de análise
 
 Mostra informações como:
 
-Principais temas do material
+- Quantidade de questões geradas
 
-Assuntos mais cobrados em concursos
+- Total de Acertos
 
-Pontos fracos do usuário (com base no quiz)
+- Porcentagem de acertos
+ 
 
-🛠️ Tecnologias Utilizadas
-Frontend
+## 🛠️ Tecnologias Utilizadas
 
-React + Next.js
+### Frontend:
 
-TailwindCSS
+- React + Next.js
 
-Shadcn UI (componentes)
+- TailwindCSS
 
-Backend
-
-Java Spring Boot
-
-API REST
-
-Upload de arquivos com validação
-
-Integração com APIs de IA
-
-IA
-
-Geração de resumo
-
-Criação de questões
-
-Síntese de conteúdo
-
-Modelos para extração de texto via PDF
-
-PostgreSQL
+- Shadcn UI (componentes)
 
 
+### Backend:
 
-📤 Fluxo do Usuário
+- DDD (Domain-Driven Design)
 
-O usuário cria uma conta ou faz login
+- Java Spring Boot
 
-Faz upload de um arquivo PDF
+- JPA
 
-A IA extrai e analisa o conteúdo
+- JWT
 
-O sistema gera:
+- Spring Security
 
-Resumo
+- API REST
 
-Flashcards
+- Integração com APIs de IA (Gemini)
 
-Questões
+- PostgreSQL
 
-Mapa mental
+ ### IA:
 
-O usuário pode salvar, exportar ou marcar como estudado
+- Criação de questões
 
-A plataforma acompanha o progresso
+
+## 📤 Fluxo do Usuário
+
+- O usuário cria uma conta ou faz login
+
+- Acessa o chat e cria uma sova sessão
+
+- Manda as informações de banca quantidade e o prompt
+
+- A IA extrai e analisa o conteúdo
+
+- O sistema gera questões
+
+- A plataforma acompanha o progresso
