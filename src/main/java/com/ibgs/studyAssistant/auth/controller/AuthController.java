@@ -1,9 +1,6 @@
 package com.ibgs.studyAssistant.auth.controller;
 
-import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
-import com.ibgs.studyAssistant.auth.dto.LoginRequest;
-import com.ibgs.studyAssistant.auth.dto.LoginResponse;
-import com.ibgs.studyAssistant.auth.dto.RefreshTokenRequest;
+import com.ibgs.studyAssistant.auth.dto.*;
 import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -42,4 +39,15 @@ public class AuthController {
         return ResponseEntity.ok().body(authMeResponse);
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.username());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
 }

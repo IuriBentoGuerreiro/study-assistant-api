@@ -1,12 +1,11 @@
 package com.ibgs.studyAssistant.auth.service;
 
-import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
-import com.ibgs.studyAssistant.auth.dto.LoginRequest;
-import com.ibgs.studyAssistant.auth.dto.LoginResponse;
-import com.ibgs.studyAssistant.auth.dto.RefreshTokenRequest;
+import com.ibgs.studyAssistant.auth.dto.*;
 import com.ibgs.studyAssistant.auth.enuns.RoleName;
+import com.ibgs.studyAssistant.auth.model.PasswordResetToken;
 import com.ibgs.studyAssistant.auth.model.Role;
 import com.ibgs.studyAssistant.auth.model.User;
+import com.ibgs.studyAssistant.auth.repository.PasswordResetTokenRepository;
 import com.ibgs.studyAssistant.auth.utils.JwtUtil;
 import com.ibgs.studyAssistant.exception.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     public ResponseEntity<LoginResponse> login(LoginRequest request) {
 
@@ -86,6 +90,44 @@ public class AuthService {
         return ResponseEntity.ok(
                 new LoginResponse(newAccessToken, newRefreshToken)
         );
+    }
+
+    public void forgotPassword(String username) {
+
+        User user = userService.findByUsername(username);
+
+        String token = UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
+
+        passwordResetTokenRepository.save(resetToken);
+
+        emailService.sendPasswordResetEmail(user.getUsername(), token);
+    }
+
+    public void resetPassword(ResetPasswordRequest request) {
+
+        PasswordResetToken resetToken = passwordResetTokenRepository
+                .findByToken(request.token())
+                .orElseThrow(() -> new InvalidTokenException("Token inválido"));
+
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new InvalidTokenException("Token expirado");
+        }
+
+        User user = resetToken.getUser();
+
+        user.setPassword(
+                passwordEncoder.encode(request.newPassword())
+        );
+
+        userService.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
     }
 
     public AuthMeResponse getCurrentUser() {
