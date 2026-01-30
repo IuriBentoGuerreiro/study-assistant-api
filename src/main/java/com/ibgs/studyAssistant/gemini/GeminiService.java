@@ -36,6 +36,7 @@ public class GeminiService {
             - NÃO use Markdown
             - NÃO inclua texto fora do JSON
             - Sempre em português do Brasil
+            - Sempre que possível pegue questões reais que já caíram nas provas de concurso
             
             Formato obrigatório:
             [
