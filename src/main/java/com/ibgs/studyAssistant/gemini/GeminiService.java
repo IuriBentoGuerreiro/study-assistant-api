@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
+import com.ibgs.studyAssistant.enuns.QuestionType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -22,25 +23,39 @@ public class GeminiService {
     private String apiKey;
 
     private static final String PROMPT_GENERATE = """
-            Você é um assistente de estudos especializado em concursos públicos da banca {banca}.
+            Você é um especialista em elaboração de questões para concursos públicos, com profundo conhecimento do estilo, do nível de dificuldade e dos padrões de cobrança da banca {banca}.
             
-            Gere exatamente {quantidade} questões de múltipla escolha com base no conteúdo fornecido.
+            Gere exatamente {quantidade} questões de múltipla escolha com base no conteúdo fornecido pelo usuário.
             
-            Regras:
-            - Cada questão deve conter:
-              - statement (a pergunta)
-              - options (4 alternativas)
-              - correctAnswerIndex (índice da resposta correta como número inteiro de 0 a 3)
-            - A alternativa correta deve estar em correctAnswerIndex (0 = primeira alternativa, 1 = segunda, 2 = terceira, 3 = quarta)
-            - Retorne APENAS um JSON válido
-            - NÃO use Markdown
-            - NÃO inclua texto fora do JSON
-            - Sempre em português do Brasil
-            - Sempre que possível pegue questões reais que já caíram nas provas de concurso
+            Diretrizes obrigatórias:
+            - As questões devem ser de nível alto, compatíveis com provas reais da banca {banca}.
+            - Sempre que possível, utilize questões que já tenham sido cobradas em concursos públicos anteriores.
+            - Caso não seja possível reproduzir uma questão real, crie uma questão inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
+              - linguagem técnica
+              - nível de aprofundamento
+              - pegadinhas conceituais comuns da banca
+              - cobrança literal de conceitos, normas ou definições quando aplicável
+            - Evite questões genéricas, introdutórias ou de nível básico.
+            - Não explique as respostas.
+            - Não faça comentários, introduções ou conclusões.
             
-            Formato obrigatório:
+            Estrutura de cada questão:
+            - "statement": enunciado claro, objetivo e compatível com provas oficiais.
+            - "options": exatamente 4 alternativas.
+            - "correctAnswerIndex": número inteiro de 0 a 3, indicando a alternativa correta.
+            
+            Regras de formatação:
+            - Retorne APENAS um JSON válido.
+            - NÃO utilize Markdown.
+            - NÃO inclua qualquer texto fora do JSON.
+            - NÃO utilize comentários.
+            - Sempre escreva em português do Brasil.
+            - As alternativas devem seguir o formato "(A)", "(B)", "(C)", "(D)".
+            
+            Formato obrigatório de saída:
             [
               {
+                "type": "MULTIPLE_CHOICE",
                 "statement": "Pergunta aqui?",
                 "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
                 "correctAnswerIndex": 1
@@ -50,12 +65,69 @@ public class GeminiService {
             Exemplo:
             [
               {
+                "type": "MULTIPLE_CHOICE",
                 "statement": "Qual é a capital do Brasil?",
                 "options": ["(A) São Paulo", "(B) Brasília", "(C) Rio de Janeiro", "(D) Salvador"],
                 "correctAnswerIndex": 1
               }
             ]
             """;
+
+    private static final String PROMPT_GENERATE_TRUE_FALSE = """
+            Você é um especialista em elaboração de questões para concursos públicos, com profundo conhecimento do estilo, do nível de dificuldade e dos padrões de cobrança da banca {banca}, especialmente no modelo CERTO ou ERRADO utilizado pelo CEBRASPE.
+            
+            Gere exatamente {quantidade} questões do tipo CERTO ou ERRADO com base no conteúdo fornecido pelo usuário.
+            
+            Diretrizes obrigatórias:
+            - As questões devem seguir rigorosamente o modelo CEBRASPE (uma assertiva para julgamento).
+            - O nível deve ser médio a alto, compatível com provas reais da banca {banca}.
+            - Sempre que possível, utilize assertivas que já tenham sido cobradas em concursos públicos anteriores.
+            - Caso não seja possível reproduzir uma assertiva real, crie uma inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
+              - linguagem técnica e formal
+              - alto nível de precisão conceitual
+              - pegadinhas conceituais comuns da banca
+              - afirmações absolutas, restritivas ou sutis quando aplicável
+            - Evite assertivas óbvias, introdutórias ou excessivamente genéricas.
+            - Não explique as respostas.
+            - Não faça comentários, introduções ou conclusões.
+            
+            Estrutura de cada questão:
+            - "statement": uma assertiva clara, objetiva e passível de julgamento como CERTO ou ERRADO.
+            - "correctAnswerIndex":
+              - 0 para CERTO
+              - 1 para ERRADO
+            
+            Regras de formatação:
+            - Retorne APENAS um JSON válido.
+            - NÃO utilize Markdown.
+            - NÃO inclua qualquer texto fora do JSON.
+            - NÃO utilize comentários.
+            - Sempre escreva em português do Brasil.
+            
+            Formato obrigatório de saída:
+            [
+              {
+                "type": "TRUE_FALSE",
+                "statement": "Assertiva para julgamento.",
+                "correctAnswerIndex": 0
+              }
+            ]
+            
+            Exemplo:
+            [
+              {
+                "type": "TRUE_FALSE",
+                "statement": "No Java, a palavra-chave final impede que uma classe seja herdada.",
+                "correctAnswerIndex": 0
+              },
+              {
+                "type": "TRUE_FALSE",
+                "statement": "No PostgreSQL, o comando TRUNCATE permite a utilização da cláusula WHERE.",
+                "correctAnswerIndex": 1
+              }
+            ]
+            """;
+
 
     private static final String PROMPT_RESUME = """
             Você é um assistente de estudos especializado em preparação para concursos públicos.
@@ -110,9 +182,16 @@ public class GeminiService {
                 .build();
     }
 
-    public List<QuestionGenerateDTO> generateQuestions(String promptUser, String banca, int quantidade) {
+    public List<QuestionGenerateDTO> generateQuestions(
+            String promptUser,
+            String banca,
+            int quantidade,
+            QuestionType type
+    ) {
 
-        String promptFinal = PROMPT_GENERATE
+        String basePrompt = getPromptByType(type);
+
+        String promptFinal = basePrompt
                 .replace("{banca}", banca)
                 .replace("{quantidade}", String.valueOf(quantidade))
                 + "\n\nConteúdo base:\n" + promptUser;
@@ -121,14 +200,9 @@ public class GeminiService {
 
         try {
             List<QuestionGenerateDTO> questions =
-                    objectMapper.readValue(json, new TypeReference<>() {
-                    });
+                    objectMapper.readValue(json, new TypeReference<>() {});
 
-            questions.forEach(q -> {
-                if (q.options() == null || q.options().size() != 4) {
-                    throw new RuntimeException("Questão inválida: " + q);
-                }
-            });
+            validateQuestions(questions, type);
 
             return questions;
 
@@ -136,6 +210,7 @@ public class GeminiService {
             throw new RuntimeException("Erro ao gerar questões", e);
         }
     }
+
 
     public String generateResume(String content) {
         String prompt = PROMPT_RESUME + "\n" + truncateText(content);
@@ -211,4 +286,46 @@ public class GeminiService {
             throw new RuntimeException("Erro ao processar resposta do Gemini", e);
         }
     }
+
+    private String getPromptByType(QuestionType type) {
+        return switch (type) {
+            case TRUE_FALSE -> PROMPT_GENERATE_TRUE_FALSE;
+            case MULTIPLE_CHOICE -> PROMPT_GENERATE;
+        };
+    }
+
+    private void validateQuestions(List<QuestionGenerateDTO> questions, QuestionType type) {
+
+        for (QuestionGenerateDTO q : questions) {
+
+            if (q.statement() == null || q.statement().isBlank()) {
+                throw new RuntimeException("Questão sem enunciado");
+            }
+
+            if (q.type() != type) {
+                throw new RuntimeException("Tipo da questão inconsistente: " + q);
+            }
+
+            switch (type) {
+                case MULTIPLE_CHOICE -> {
+                    if (q.options() == null || q.options().size() != 4) {
+                        throw new RuntimeException("Questão de múltipla escolha inválida: " + q);
+                    }
+                    if (q.correctAnswerIndex() < 0 || q.correctAnswerIndex() > 3) {
+                        throw new RuntimeException("Índice de resposta inválido: " + q);
+                    }
+                }
+
+                case TRUE_FALSE -> {
+                    if (q.options() != null && !q.options().isEmpty()) {
+                        throw new RuntimeException("Questão TRUE_FALSE não deve ter opções: " + q);
+                    }
+                    if (q.correctAnswerIndex() < 0 || q.correctAnswerIndex() > 1) {
+                        throw new RuntimeException("Resposta TRUE_FALSE inválida: " + q);
+                    }
+                }
+            }
+        }
+    }
+
 }

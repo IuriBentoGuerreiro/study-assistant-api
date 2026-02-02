@@ -5,6 +5,7 @@ import com.ibgs.studyAssistant.domain.Question;
 import com.ibgs.studyAssistant.domain.StudySession;
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
 import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
+import com.ibgs.studyAssistant.enuns.QuestionType;
 import com.ibgs.studyAssistant.exception.LimitExceededException;
 import com.ibgs.studyAssistant.gemini.GeminiService;
 import com.ibgs.studyAssistant.repository.StudySessionRepository;
@@ -36,7 +37,7 @@ public class StudySessionService {
     }
 
     @Transactional
-    public StudySession generateSession(Integer userId, String prompt, String banca, int quantidade) {
+    public StudySession generateSession(Integer userId, String prompt, String banca, int quantidade, QuestionType type) {
 
         if(quantidade > 50){
             throw new LimitExceededException
@@ -44,7 +45,7 @@ public class StudySessionService {
         }
 
         List<QuestionGenerateDTO> generated =
-                geminiService.generateQuestions(prompt, banca, quantidade);
+                geminiService.generateQuestions(prompt, banca, quantidade, type);
 
         StudySession session = new StudySession();
 
@@ -62,6 +63,7 @@ public class StudySessionService {
                     entity.setOptions(q.options());
                     entity.setStudySession(session);
                     entity.setCorrectAnswerIndex(q.correctAnswerIndex());
+                    entity.setType(q.type());
 
                     return entity;
                 })

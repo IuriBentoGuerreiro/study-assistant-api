@@ -2,6 +2,7 @@ package com.ibgs.studyAssistant.controller;
 
 import com.ibgs.studyAssistant.domain.StudySession;
 import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
+import com.ibgs.studyAssistant.enuns.QuestionType;
 import com.ibgs.studyAssistant.service.StudySessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,10 +30,11 @@ public class StudySessionController {
             @RequestParam Integer userId,
             @RequestBody String prompt,
             @RequestParam String banca,
-            @RequestParam int quantidade
+            @RequestParam int quantidade,
+            @RequestParam QuestionType type
     ) {
         StudySession session =
-                studySessionService.generateSession(userId, prompt, banca, quantidade);
+                studySessionService.generateSession(userId, prompt, banca, quantidade, type);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -2,6 +2,7 @@ package com.ibgs.studyAssistant.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibgs.studyAssistant.common.BaseEntity;
+import com.ibgs.studyAssistant.enuns.QuestionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,4 +35,9 @@ public class Question extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "study_session_id")
     private StudySession studySession;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private QuestionType type;
+
 }
