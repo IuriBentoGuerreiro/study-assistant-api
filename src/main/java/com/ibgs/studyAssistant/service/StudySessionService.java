@@ -2,10 +2,9 @@ package com.ibgs.studyAssistant.service;
 
 import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.domain.Question;
+import com.ibgs.studyAssistant.domain.QuestionOption;
 import com.ibgs.studyAssistant.domain.StudySession;
-import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
-import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
-import com.ibgs.studyAssistant.enuns.QuestionType;
+import com.ibgs.studyAssistant.dto.*;
 import com.ibgs.studyAssistant.exception.LimitExceededException;
 import com.ibgs.studyAssistant.gemini.GeminiService;
 import com.ibgs.studyAssistant.repository.StudySessionRepository;
@@ -25,53 +24,82 @@ public class StudySessionService {
     private final UserService userService;
 
     @Transactional
-    public List<StudySessionNameDTO> findAllSessionNameByUser(Integer userId){
+    public List<StudySessionNameDTO> findAllSessionNameByUser(Integer userId) {
         return studySessionRepository.findSessionNameByUserId(userId);
     }
 
     @Transactional
-    public StudySession findById(Integer id){
+    public StudySession findById(Integer id) {
         return studySessionRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Recurso Não Encontrado")
         );
     }
 
     @Transactional
-    public StudySession generateSession(Integer userId, String prompt, String banca, int quantidade, QuestionType type) {
+    public StudySessionResponseDTO generateSession(
+            PromptRequest request, Integer userId) {
 
-        if(quantidade > 50){
+        if (request.quantidade() > 50) {
             throw new LimitExceededException
                     ("O Limite de questões a ser gerado por vez é 50");
         }
 
         List<QuestionGenerateDTO> generated =
-                geminiService.generateQuestions(prompt, banca, quantidade, type);
+                geminiService.generateQuestions(request);
 
         StudySession session = new StudySession();
 
-        session.setSessionName(generateSessionName(prompt));
+        session.setSessionName(generateSessionName(request.prompt()));
 
         session.setUser(userService.findById(userId));
+        List<Question> questions = generated.stream().map(q -> {
 
+            Question question = new Question();
+            question.setStatement(q.statement());
+            question.setCorrectAnswerIndex(q.correctAnswerIndex());
+            question.setType(q.type());
+            question.setStudySession(session);
 
-        List<Question> questions = generated.stream().map(questionGenerateDTO -> {
+            List<QuestionOption> options =
+                    q.options() == null
+                            ? List.of()
+                            : q.options().stream()
+                            .map(opt -> {
+                                QuestionOption option = new QuestionOption();
+                                option.setOptions(opt);
+                                option.setQuestion(question);
+                                return option;
+                            })
+                            .toList();
 
-                    QuestionGenerateDTO q = questionGenerateDTO;
+            question.setOptions(options);
 
-                    Question entity = new Question();
-                    entity.setStatement(q.statement());
-                    entity.setOptions(q.options());
-                    entity.setStudySession(session);
-                    entity.setCorrectAnswerIndex(q.correctAnswerIndex());
-                    entity.setType(q.type());
-
-                    return entity;
-                })
-                .toList();
+            return question;
+        }).toList();
 
         session.setQuestions(questions);
 
-        return studySessionRepository.save(session);
+        StudySession saved = studySessionRepository.save(session);
+
+        return new StudySessionResponseDTO(
+                saved.getId(),
+                saved.getSessionName(),
+                saved.getQuestions().stream().map(q ->
+                        new QuestionResponse(
+                                q.getId(),
+                                q.getStatement(),
+                                q.getType(),
+                                q.getOptions() == null
+                                        ? List.of()
+                                        : q.getOptions().stream()
+                                        .map(QuestionOption::getOptions)
+                                        .toList(),
+                                q.getCorrectAnswerIndex(),
+                                q.getStudyAnswer()
+                        )
+                ).toList()
+        );
+
     }
 
     private String generateSessionName(String prompt) {

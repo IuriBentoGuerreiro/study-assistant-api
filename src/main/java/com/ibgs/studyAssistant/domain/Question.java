@@ -28,8 +28,8 @@ public class Question extends BaseEntity {
     @Column(name = "correct_answer_index")
     private Integer correctAnswerIndex;
 
-    @ElementCollection
-    private List<String> options;
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionOption> options;
 
     @JsonIgnore
     @ManyToOne

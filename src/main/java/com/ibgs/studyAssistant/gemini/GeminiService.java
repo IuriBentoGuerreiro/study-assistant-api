@@ -3,6 +3,7 @@ package com.ibgs.studyAssistant.gemini;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibgs.studyAssistant.dto.PromptRequest;
 import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
 import com.ibgs.studyAssistant.enuns.QuestionType;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,14 +26,23 @@ public class GeminiService {
     private static final String PROMPT_GENERATE = """
             Você é um especialista em elaboração de questões para concursos públicos, com profundo conhecimento do estilo, do nível de dificuldade e dos padrões de cobrança da banca {banca}.
             
+            Contexto do concurso (considere apenas se as informações forem fornecidas):
+            - Cargo: {cargo}
+            - Cidade: {cidade}
+            - Estado: {estado}
+            - Nível do concurso: {nivel} (médio ou superior)
+            
+            Caso alguma dessas informações não seja fornecida, desconsidere-a completamente.
+            
             Gere exatamente {quantidade} questões de múltipla escolha com base no conteúdo fornecido pelo usuário.
             
             Diretrizes obrigatórias:
             - As questões devem ser de nível alto, compatíveis com provas reais da banca {banca}.
-            - Sempre que possível, utilize questões que já tenham sido cobradas em concursos públicos anteriores.
+            - Adeque o nível de profundidade ao nível do concurso ({nivel}), quando informado.
+            - Sempre que possível, utilize questões que já tenham sido cobradas em concursos públicos anteriores, compatíveis com o cargo informado.
             - Caso não seja possível reproduzir uma questão real, crie uma questão inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
               - linguagem técnica
-              - nível de aprofundamento
+              - nível de aprofundamento compatível com o cargo
               - pegadinhas conceituais comuns da banca
               - cobrança literal de conceitos, normas ou definições quando aplicável
             - Evite questões genéricas, introdutórias ou de nível básico.
@@ -61,26 +71,26 @@ public class GeminiService {
                 "correctAnswerIndex": 1
               }
             ]
-            
-            Exemplo:
-            [
-              {
-                "type": "MULTIPLE_CHOICE",
-                "statement": "Qual é a capital do Brasil?",
-                "options": ["(A) São Paulo", "(B) Brasília", "(C) Rio de Janeiro", "(D) Salvador"],
-                "correctAnswerIndex": 1
-              }
-            ]
             """;
 
     private static final String PROMPT_GENERATE_TRUE_FALSE = """
             Você é um especialista em elaboração de questões para concursos públicos, com profundo conhecimento do estilo, do nível de dificuldade e dos padrões de cobrança da banca {banca}, especialmente no modelo CERTO ou ERRADO utilizado pelo CEBRASPE.
+            
+            Contexto do concurso (considere apenas se as informações forem fornecidas):
+            - Cargo: {cargo}
+            - Cidade: {cidade}
+            - Estado: {estado}
+            - Nível do concurso: {nivel} (médio ou superior)
+            - Orgão do concurso: {orgao} (para qual orgão o concurso será realizado)
+            
+            Caso alguma dessas informações não seja fornecida, desconsidere-a completamente.
             
             Gere exatamente {quantidade} questões do tipo CERTO ou ERRADO com base no conteúdo fornecido pelo usuário.
             
             Diretrizes obrigatórias:
             - As questões devem seguir rigorosamente o modelo CEBRASPE (uma assertiva para julgamento).
             - O nível deve ser médio a alto, compatível com provas reais da banca {banca}.
+            - Adeque o grau de tecnicidade ao cargo e ao nível do concurso ({nivel}), quando informados.
             - Sempre que possível, utilize assertivas que já tenham sido cobradas em concursos públicos anteriores.
             - Caso não seja possível reproduzir uma assertiva real, crie uma inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
               - linguagem técnica e formal
@@ -112,22 +122,7 @@ public class GeminiService {
                 "correctAnswerIndex": 0
               }
             ]
-            
-            Exemplo:
-            [
-              {
-                "type": "TRUE_FALSE",
-                "statement": "No Java, a palavra-chave final impede que uma classe seja herdada.",
-                "correctAnswerIndex": 0
-              },
-              {
-                "type": "TRUE_FALSE",
-                "statement": "No PostgreSQL, o comando TRUNCATE permite a utilização da cláusula WHERE.",
-                "correctAnswerIndex": 1
-              }
-            ]
             """;
-
 
     private static final String PROMPT_RESUME = """
             Você é um assistente de estudos especializado em preparação para concursos públicos.
@@ -182,28 +177,21 @@ public class GeminiService {
                 .build();
     }
 
-    public List<QuestionGenerateDTO> generateQuestions(
-            String promptUser,
-            String banca,
-            int quantidade,
-            QuestionType type
-    ) {
+    public List<QuestionGenerateDTO> generateQuestions(PromptRequest request) {
 
-        String basePrompt = getPromptByType(type);
+        String promptFinal = buildPrompt(request);
 
-        String promptFinal = basePrompt
-                .replace("{banca}", banca)
-                .replace("{quantidade}", String.valueOf(quantidade))
-                + "\n\nConteúdo base:\n" + promptUser;
-
-        String json = callGemini(promptFinal);
+        String raw = callGemini(promptFinal);
+        String json = extractJsonArray(raw);
 
         try {
             List<QuestionGenerateDTO> questions =
-                    objectMapper.readValue(json, new TypeReference<>() {});
+                    objectMapper.readValue(
+                            json,
+                            new TypeReference<List<QuestionGenerateDTO>>() {}
+                    );
 
-            validateQuestions(questions, type);
-
+            validateQuestions(questions, request.type());
             return questions;
 
         } catch (Exception e) {
@@ -211,10 +199,27 @@ public class GeminiService {
         }
     }
 
-
     public String generateResume(String content) {
         String prompt = PROMPT_RESUME + "\n" + truncateText(content);
         return callGemini(prompt);
+    }
+
+    private String buildPrompt(PromptRequest request) {
+        return getPromptByType(request.type())
+                + field("Banca", request.banca())
+                + field("Órgão", request.orgao())
+                + field("Cargo", request.cargo())
+                + field("Cidade", request.cidade())
+                + field("Estado", request.estado())
+                + field("Nível", request.nivel())
+                + "\nQuantidade: " + request.quantidade()
+                + "\n\nConteúdo base:\n" + request.prompt();
+    }
+
+    private String field(String label, String value) {
+        return value == null || value.isBlank()
+                ? ""
+                : "\n" + label + ": " + value;
     }
 
     private String truncateText(String prompt) {
@@ -268,6 +273,18 @@ public class GeminiService {
         return extractText(response);
     }
 
+    private String extractJsonArray(String text) {
+
+        int start = text.indexOf("[");
+        int end = text.lastIndexOf("]");
+
+        if (start == -1 || end == -1 || end <= start) {
+            throw new RuntimeException("Resposta do Gemini não contém JSON válido");
+        }
+
+        return text.substring(start, end + 1);
+    }
+
     private String extractText(String json) {
         try {
             JsonNode root = objectMapper.readTree(json);
@@ -302,7 +319,7 @@ public class GeminiService {
                 throw new RuntimeException("Questão sem enunciado");
             }
 
-            if (q.type() != type) {
+            if (q.type() == null || q.type() != type) {
                 throw new RuntimeException("Tipo da questão inconsistente: " + q);
             }
 

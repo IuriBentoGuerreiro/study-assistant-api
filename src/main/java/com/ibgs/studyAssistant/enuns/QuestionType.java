@@ -1,6 +1,15 @@
 package com.ibgs.studyAssistant.enuns;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum QuestionType {
     MULTIPLE_CHOICE,
-    TRUE_FALSE
+    TRUE_FALSE;
+
+    @JsonCreator
+    public static QuestionType from(String value) {
+        return QuestionType.valueOf(
+                value.trim().toUpperCase().replace(" ", "_")
+        );
+    }
 }
