@@ -31,7 +31,7 @@ public class StudySessionService {
     @Transactional
     public StudySession findById(Integer id) {
         return studySessionRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Recurso Não Encontrado")
+                () -> new RuntimeException("Sessão Não Encontrada")
         );
     }
 
@@ -125,6 +125,13 @@ public class StudySessionService {
                 : String.join(" ", Arrays.copyOfRange(words, 0, 6));
 
         return capitalize(title);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        StudySession entity = findById(id);
+
+        studySessionRepository.delete(entity);
     }
 
     private String extractPromptIfJson(String input) {

@@ -5,6 +5,7 @@ import com.ibgs.studyAssistant.dto.StudySessionNameDTO;
 import com.ibgs.studyAssistant.dto.StudySessionResponseDTO;
 import com.ibgs.studyAssistant.service.StudySessionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,5 +33,11 @@ public class StudySessionController {
         return studySessionService.generateSession(
                 request, userId
         );
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id){
+        studySessionService.delete(id);
     }
 }
