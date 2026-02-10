@@ -11,7 +11,7 @@ import java.util.List;
 public interface ResumeRepository extends JpaRepository<Resume, Integer> {
 
     @Query("""
-    select new com.ibgs.studyAssistant.dto.ResumeTitleDTO(
+    select new com.ibgs.studyAssistant.resume.dto.ResumeTitleDTO(
         r.id,
         r.title,
         r.createdAt

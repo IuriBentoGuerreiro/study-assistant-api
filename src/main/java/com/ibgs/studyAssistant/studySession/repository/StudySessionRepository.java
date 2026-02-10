@@ -11,7 +11,7 @@ import java.util.List;
 public interface StudySessionRepository extends JpaRepository<StudySession, Integer> {
 
     @Query("""
-    select new com.ibgs.studyAssistant.dto.StudySessionNameDTO(
+    select new com.ibgs.studyAssistant.studySession.dto.StudySessionNameDTO(
         s.id,
         s.sessionName,
         s.createdAt
