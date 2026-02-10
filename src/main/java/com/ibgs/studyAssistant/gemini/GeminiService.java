@@ -3,9 +3,9 @@ package com.ibgs.studyAssistant.gemini;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibgs.studyAssistant.dto.PromptRequest;
-import com.ibgs.studyAssistant.dto.QuestionGenerateDTO;
-import com.ibgs.studyAssistant.enuns.QuestionType;
+import com.ibgs.studyAssistant.studySession.dto.PromptRequest;
+import com.ibgs.studyAssistant.question.dto.QuestionGenerateDTO;
+import com.ibgs.studyAssistant.question.enuns.QuestionType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -89,7 +89,7 @@ public class GeminiService {
             
             Diretrizes obrigatórias:
             - As questões devem seguir rigorosamente o modelo CEBRASPE (uma assertiva para julgamento).
-            - O nível deve ser médio a alto, compatível com provas reais da banca {banca}.
+            - O nível deve ser alto, compatível com provas reais da banca {banca}.
             - Adeque o grau de tecnicidade ao cargo e ao nível do concurso ({nivel}), quando informados.
             - Sempre que possível, utilize assertivas que já tenham sido cobradas em concursos públicos anteriores.
             - Caso não seja possível reproduzir uma assertiva real, crie uma inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
