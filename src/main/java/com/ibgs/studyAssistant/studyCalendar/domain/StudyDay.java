@@ -19,15 +19,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class StudyDay extends BaseEntity {
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_Id")
+    @ManyToOne
+    @JoinColumn(name = "user_Id", nullable = false)
     private User user;
 
+    @Column(name = "study_date", nullable = false)
     private LocalDate studyDate;
 
+    @Column(name = "studied_minutes", nullable = false)
     private Integer studiedMinutes;
-    private Integer solvedQuestions;
 
-    private boolean completed;
+    @Column(name = "completed")
+    private Boolean completed;
+
+    @Column(name = "completed_at")
     private LocalDateTime completedAt;
 }

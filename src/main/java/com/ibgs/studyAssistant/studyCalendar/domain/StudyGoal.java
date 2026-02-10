@@ -8,27 +8,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Entity
-@Table(name = "study_goal",   uniqueConstraints = @UniqueConstraint(
-        columnNames = {"user_id", "study_date"}
-    )
-)
+@Table(name = "study_goal")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudyGoal extends BaseEntity {
 
-    @ManyToOne
-    @JoinColumn(name = "user_Id")
+    @OneToOne
+    @JoinColumn(name = "user_Id", unique = true)
     private User user;
 
+    @Column(name = "daily_study_minutes", nullable = false)
     private Integer dailyStudyMinutes;
-    private Integer dailyQuestionsTarget;
-    private LocalDate startDate;
-    private LocalDate endDate;
-
-    private boolean active;
 }
