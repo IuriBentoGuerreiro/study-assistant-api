@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/study-day")
 @RequiredArgsConstructor
@@ -18,5 +20,17 @@ public class StudyDayController {
     @ResponseStatus(HttpStatus.CREATED)
     public StudyDayResponse create(@RequestBody StudyDayRequest request){
         return service.create(request);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public StudyDayResponse update(@PathVariable Integer id, @RequestBody StudyDayRequest request){
+        return service.update(id, request);
+    }
+
+    @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<StudyDayResponse> findByUser(@PathVariable Integer userId){
+        return service.findByUser(userId);
     }
 }

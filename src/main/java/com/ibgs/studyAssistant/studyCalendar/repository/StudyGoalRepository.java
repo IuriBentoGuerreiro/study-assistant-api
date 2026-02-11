@@ -8,6 +8,4 @@ import java.util.Optional;
 public interface StudyGoalRepository extends JpaRepository<StudyGoal, Integer> {
 
     Optional<StudyGoal> findByUserId(Integer userId);
-
-    boolean existsByUserId(Integer userId);
 }
