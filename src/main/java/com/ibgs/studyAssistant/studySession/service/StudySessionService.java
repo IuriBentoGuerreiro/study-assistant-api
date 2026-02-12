@@ -1,17 +1,18 @@
 package com.ibgs.studyAssistant.studySession.service;
 
+import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
 import com.ibgs.studyAssistant.auth.service.UserService;
-import com.ibgs.studyAssistant.question.domain.Question;
-import com.ibgs.studyAssistant.question.domain.QuestionOption;
 import com.ibgs.studyAssistant.exception.LimitExceededException;
 import com.ibgs.studyAssistant.gemini.GeminiService;
+import com.ibgs.studyAssistant.question.domain.Question;
+import com.ibgs.studyAssistant.question.domain.QuestionOption;
 import com.ibgs.studyAssistant.question.dto.QuestionGenerateDTO;
 import com.ibgs.studyAssistant.question.dto.QuestionResponse;
 import com.ibgs.studyAssistant.studySession.domain.StudySession;
 import com.ibgs.studyAssistant.studySession.dto.PromptRequest;
 import com.ibgs.studyAssistant.studySession.dto.StudySessionNameDTO;
-import com.ibgs.studyAssistant.studySession.repository.StudySessionRepository;
 import com.ibgs.studyAssistant.studySession.dto.StudySessionResponseDTO;
+import com.ibgs.studyAssistant.studySession.repository.StudySessionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,10 @@ public class StudySessionService {
     private final UserService userService;
 
     @Transactional
-    public List<StudySessionNameDTO> findAllSessionNameByUser(Integer userId) {
-        return studySessionRepository.findSessionNameByUserId(userId);
+    public List<StudySessionNameDTO> findAllSessionNameByUser() {
+        UserMeResponse user = userService.getCurrentUser();
+
+        return studySessionRepository.findSessionNameByUserId(user.id());
     }
 
     @Transactional
@@ -40,13 +43,14 @@ public class StudySessionService {
     }
 
     @Transactional
-    public StudySessionResponseDTO generateSession(
-            PromptRequest request, Integer userId) {
+    public StudySessionResponseDTO generateSession(PromptRequest request) {
 
         if (request.quantidade() > 50) {
             throw new LimitExceededException
                     ("O Limite de questões a ser gerado por vez é 50");
         }
+
+        UserMeResponse user = userService.getCurrentUser();
 
         List<QuestionGenerateDTO> generated =
                 geminiService.generateQuestions(request);
@@ -55,7 +59,8 @@ public class StudySessionService {
 
         session.setSessionName(generateSessionName(request.prompt()));
 
-        session.setUser(userService.findById(userId));
+        session.setUser(userService.findById(user.id()));
+
         List<Question> questions = generated.stream().map(q -> {
 
             Question question = new Question();

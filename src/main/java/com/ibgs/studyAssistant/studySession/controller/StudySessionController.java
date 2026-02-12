@@ -18,21 +18,18 @@ public class StudySessionController {
 
     private final StudySessionService studySessionService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<StudySessionNameDTO>> findAllByUser(@PathVariable Integer userId) {
-        List<StudySessionNameDTO> studySessions = studySessionService.findAllSessionNameByUser(userId);
+    @GetMapping
+    public ResponseEntity<List<StudySessionNameDTO>> findAllByUser() {
+        List<StudySessionNameDTO> studySessions = studySessionService.findAllSessionNameByUser();
 
         return ResponseEntity.ok().body(studySessions);
     }
 
     @PostMapping("/generateIa")
-    public StudySessionResponseDTO generate(
-            @RequestBody PromptRequest request,
-            @RequestParam Integer userId
-    ) {
-        return studySessionService.generateSession(
-                request, userId
-        );
+    public ResponseEntity<StudySessionResponseDTO> generate(@RequestBody PromptRequest request) {
+        StudySessionResponseDTO response = studySessionService.generateSession(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")

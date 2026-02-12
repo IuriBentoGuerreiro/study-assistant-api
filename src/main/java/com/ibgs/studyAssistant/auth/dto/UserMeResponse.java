@@ -2,7 +2,7 @@ package com.ibgs.studyAssistant.auth.dto;
 
 import java.util.List;
 
-public record AuthMeResponse(
+public record UserMeResponse(
         Integer id,
         String username,
         List<String> roles

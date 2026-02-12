@@ -1,12 +1,11 @@
 package com.ibgs.studyAssistant.resume.service;
 
-import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
-import com.ibgs.studyAssistant.auth.service.AuthService;
+import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
 import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.gemini.GeminiService;
 import com.ibgs.studyAssistant.resume.domain.Resume;
-import com.ibgs.studyAssistant.resume.repository.ResumeRepository;
 import com.ibgs.studyAssistant.resume.dto.ResumeTitleDTO;
+import com.ibgs.studyAssistant.resume.repository.ResumeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,6 @@ public class ResumeService {
 
     private final ResumeRepository resumeRepository;
     private final GeminiService geminiService;
-    private final AuthService authService;
     private final UserService userService;
 
     @Transactional
@@ -32,7 +30,7 @@ public class ResumeService {
 
     @Transactional
     public List<ResumeTitleDTO> findAllByUser() {
-        AuthMeResponse user = authService.getCurrentUser();
+        UserMeResponse user = userService.getCurrentUser();
 
         return resumeRepository.findResumeByUserId(user.id());
     }
@@ -40,7 +38,7 @@ public class ResumeService {
     public Resume generateResume(String prompt) {
         String resumeText = geminiService.generateResume(prompt);
 
-        AuthMeResponse user = authService.getCurrentUser();
+        UserMeResponse user = userService.getCurrentUser();
 
         Resume resume = new Resume();
 

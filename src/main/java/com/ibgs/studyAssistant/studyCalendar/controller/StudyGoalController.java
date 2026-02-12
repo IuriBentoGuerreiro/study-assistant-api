@@ -17,16 +17,26 @@ public class StudyGoalController {
     private final StudyGoalService service;
 
     @PostMapping
-    public ResponseEntity<StudyGoalResponse> createOrUpdate(
+    public ResponseEntity<StudyGoalResponse> create (
             @Valid @RequestBody StudyGoalRequest request
     ) {
-        StudyGoalResponse response = service.createOrUpdate(request);
+        StudyGoalResponse response = service.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StudyGoalResponse> update(
+            @PathVariable Integer id, @Valid @RequestBody StudyGoalRequest request
+    ) {
+        StudyGoalResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public StudyGoalResponse findByUser(@PathVariable Integer userId){
-        return service.findByUser(userId);
+    public ResponseEntity<StudyGoalResponse> findByUser(@PathVariable Integer userId){
+        StudyGoalResponse response = service.findByUser(userId);
+
+        return ResponseEntity.ok(response);
     }
 }

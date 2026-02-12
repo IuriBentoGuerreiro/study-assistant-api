@@ -33,12 +33,6 @@ public class AuthController {
         return authService.refreshToken(request);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<AuthMeResponse> me() {
-        AuthMeResponse authMeResponse = authService.getCurrentUser();
-        return ResponseEntity.ok().body(authMeResponse);
-    }
-
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request.username());

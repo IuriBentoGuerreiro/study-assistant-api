@@ -1,7 +1,7 @@
 package com.ibgs.studyAssistant.dashboard.service;
 
-import com.ibgs.studyAssistant.auth.dto.AuthMeResponse;
-import com.ibgs.studyAssistant.auth.service.AuthService;
+import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
+import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.dashboard.dto.DashboardDTO;
 import com.ibgs.studyAssistant.question.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private final AuthService authService;
+    private final UserService userService;
     private final QuestionRepository questionRepository;
 
     @Transactional
     public DashboardDTO dashboard() {
 
-        AuthMeResponse user = authService.getCurrentUser();
+        UserMeResponse user = userService.getCurrentUser();
 
         long totalQuestions =
                 questionRepository.countByUserId(user.id());

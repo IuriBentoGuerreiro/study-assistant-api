@@ -128,28 +128,4 @@ public class AuthService {
 
         passwordResetTokenRepository.delete(resetToken);
     }
-
-    public AuthMeResponse getCurrentUser() {
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new InvalidTokenException("Usuário não autenticado");
-        }
-
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof User user)) {
-            throw new InvalidTokenException("Principal inválido");
-        }
-
-        return new AuthMeResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList()
-        );
-    }
 }
