@@ -56,8 +56,13 @@ public class StudyDayService {
     }
 
     @Transactional(readOnly = true)
-    public List<StudyDayResponse> findByUser(Integer userId){
-        List<StudyDay> studyDays = repository.findByUserId(userId);
+    public List<StudyDayResponse> findByUser(LocalDate start, LocalDate end){
+        Integer userId = userService.getCurrentUser().id();
+
+        LocalDate startDate = (start != null) ? start : LocalDate.now().withDayOfMonth(1);
+        LocalDate endDate = (end != null) ? end : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+
+        List<StudyDay> studyDays = repository.findByUserIdAndStudyDateBetweenOrderByStudyDateAsc(userId, startDate, endDate);
 
         return mapper.toResponse(studyDays);
     }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -27,10 +28,9 @@ public class StudyDayController {
         return ResponseEntity.ok().body(service.update(id, request));
     }
 
-    @GetMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<StudyDayResponse>> findByUser(@PathVariable Integer userId){
-        return ResponseEntity.ok().body(service.findByUser(userId));
+    @GetMapping("/calendar")
+    public ResponseEntity<List<StudyDayResponse>> findByUser(@RequestParam LocalDate start, @RequestParam LocalDate end){
+        return ResponseEntity.ok().body(service.findByUser(start, end));
     }
 
     @GetMapping("/user/active")
@@ -41,7 +41,6 @@ public class StudyDayController {
     };
 
     @PutMapping("/finish/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<StudyDayResponse> finishSession(@PathVariable Integer id){
         return ResponseEntity.ok().body(service.finishSession(id));
     }
