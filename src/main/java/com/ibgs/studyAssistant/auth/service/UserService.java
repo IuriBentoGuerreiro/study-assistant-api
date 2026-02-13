@@ -56,4 +56,8 @@ public class UserService {
                         .toList()
         );
     }
+
+    public User getReference(Integer id) {
+        return userRepository.getReferenceById(id);
+    }
 }

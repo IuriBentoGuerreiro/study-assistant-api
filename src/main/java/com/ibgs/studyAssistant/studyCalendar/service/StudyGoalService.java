@@ -1,12 +1,8 @@
 package com.ibgs.studyAssistant.studyCalendar.service;
 
 import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
-import com.ibgs.studyAssistant.auth.model.User;
 import com.ibgs.studyAssistant.auth.service.UserService;
-import com.ibgs.studyAssistant.studyCalendar.domain.StudyDay;
 import com.ibgs.studyAssistant.studyCalendar.domain.StudyGoal;
-import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayRequest;
-import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayResponse;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyGoal.StudyGoalRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyGoal.StudyGoalResponse;
 import com.ibgs.studyAssistant.studyCalendar.mapper.StudyGoalMapper;
@@ -48,9 +44,11 @@ public class StudyGoalService {
     }
 
     @Transactional(readOnly = true)
-    public StudyGoalResponse findByUser(Integer userId) {
-        StudyGoal studyGoal = repository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Meta de estudos não encontrada"));
+    public StudyGoalResponse findByUser() {
+        UserMeResponse user = userService.getCurrentUser();
+
+        StudyGoal studyGoal = repository.findByUserId(user.id())
+                .orElse(null);
 
         return mapper.toResponse(studyGoal);
     }

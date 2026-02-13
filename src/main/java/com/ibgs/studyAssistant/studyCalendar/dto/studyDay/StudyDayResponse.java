@@ -10,7 +10,8 @@ public record StudyDayResponse(
 
         LocalDate studyDate,
         Integer studiedMinutes,
-        Boolean completed,
-        LocalDateTime completedAt
+        LocalDateTime startTime,
+        LocalDateTime endTime,
+        Boolean active
 ) {
 }

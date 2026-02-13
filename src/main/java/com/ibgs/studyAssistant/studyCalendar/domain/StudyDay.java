@@ -29,9 +29,12 @@ public class StudyDay extends BaseEntity {
     @Column(name = "studied_minutes", nullable = false)
     private Integer studiedMinutes;
 
-    @Column(name = "completed")
-    private Boolean completed;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @Column(name = "active")
+    private Boolean active;
 }

@@ -32,10 +32,10 @@ public class StudyGoalController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<StudyGoalResponse> findByUser(@PathVariable Integer userId){
-        StudyGoalResponse response = service.findByUser(userId);
+    public ResponseEntity<StudyGoalResponse> findByUser(){
+        StudyGoalResponse response = service.findByUser();
 
         return ResponseEntity.ok(response);
     }

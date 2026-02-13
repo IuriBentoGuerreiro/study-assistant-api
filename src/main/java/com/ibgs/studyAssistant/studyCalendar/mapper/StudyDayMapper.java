@@ -12,6 +12,10 @@ import java.util.List;
 public interface StudyDayMapper {
 
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "startTime", ignore = true)
+    @Mapping(target = "endTime", ignore = true)
+    @Mapping(target = "studiedMinutes", ignore = true)
     StudyDay toEntity (StudyDayRequest request);
 
     @Mapping(source = "user.id", target = "userId")
