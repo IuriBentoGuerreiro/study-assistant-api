@@ -33,12 +33,18 @@ public class StudyDayController {
         return ResponseEntity.ok().body(service.findByUser(start, end));
     }
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id){
+        service.deleteById(id);
+    }
+
     @GetMapping("/user/active")
     public ResponseEntity<StudyDayResponse> findActiveSession(){
         StudyDayResponse response = service.findActiveSession();
 
         return ResponseEntity.ok().body(response);
-    };
+    }
 
     @PutMapping("/finish/{id}")
     public ResponseEntity<StudyDayResponse> finishSession(@PathVariable Integer id){

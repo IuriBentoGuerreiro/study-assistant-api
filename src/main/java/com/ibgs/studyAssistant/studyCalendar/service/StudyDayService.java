@@ -50,13 +50,14 @@ public class StudyDayService {
 
     @Transactional
     public StudyDayResponse update(Integer id, StudyDayRequest request){
-        StudyDay studyDay = repository.findById(id).orElseThrow(
-                () -> new RuntimeException("Dia não encontrado")
-        );
+        StudyDay studyDay = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("sessão de estudo não encontrada"));
 
         BeanUtils.copyProperties(request, studyDay, "id");
 
-        return mapper.toResponse(repository.save(studyDay));
+        var saved = repository.save(studyDay);
+
+        return mapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +70,14 @@ public class StudyDayService {
         List<StudyDay> studyDays = repository.findByUserIdAndStudyDateBetweenOrderByStudyDateAsc(userId, startDate, endDate);
 
         return mapper.toResponse(studyDays);
+    }
+
+    public void deleteById(Integer id){
+        StudyDay studyDay = repository.findById(id).orElseThrow(
+                () -> new RuntimeException("sessão de estudo não encontrada")
+        );
+
+        repository.delete(studyDay);
     }
 
     @Transactional(readOnly = true)
