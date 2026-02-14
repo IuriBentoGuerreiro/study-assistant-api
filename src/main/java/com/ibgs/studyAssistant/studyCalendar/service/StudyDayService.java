@@ -28,6 +28,10 @@ public class StudyDayService {
     @Transactional
     public StudyDayResponse create(){
 
+        if (findActiveSession() != null){
+            throw new RuntimeException("Já existe uma sessão ativa.");
+        }
+
         UserMeResponse user = userService.getCurrentUser();
 
         StudyDay studyDay = new StudyDay();
