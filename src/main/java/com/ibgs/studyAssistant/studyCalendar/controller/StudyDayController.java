@@ -1,5 +1,6 @@
 package com.ibgs.studyAssistant.studyCalendar.controller;
 
+import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayManualRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayResponse;
 import com.ibgs.studyAssistant.studyCalendar.service.StudyDayService;
@@ -21,6 +22,11 @@ public class StudyDayController {
     @PostMapping
     public ResponseEntity<StudyDayResponse> create(){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create());
+    }
+
+    @PostMapping("/manual")
+    public ResponseEntity<StudyDayResponse> createManual(@RequestBody StudyDayManualRequest request){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createManual(request));
     }
 
     @PutMapping("/{id}")

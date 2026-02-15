@@ -3,6 +3,7 @@ package com.ibgs.studyAssistant.studyCalendar.service;
 import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
 import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.studyCalendar.domain.StudyDay;
+import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayManualRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayResponse;
 import com.ibgs.studyAssistant.studyCalendar.mapper.StudyDayMapper;
@@ -43,6 +44,24 @@ public class StudyDayService {
         studyDay.setActive(true);
         studyDay.setStudyDate(LocalDate.now());
 
+        repository.save(studyDay);
+
+        return mapper.toResponse(studyDay);
+    }
+
+    @Transactional
+    public StudyDayResponse createManual(StudyDayManualRequest request) {
+        UserMeResponse user = userService.getCurrentUser();
+        StudyDay studyDay = new StudyDay();
+
+        studyDay.setUser(userService.getReference(user.id()));
+        studyDay.setStudyDate(request.studyDate());
+
+        studyDay.setStartTime(request.startTime());
+        studyDay.setEndTime(request.endTime());
+        studyDay.setStudiedMinutes(request.studiedMinutes());
+
+        studyDay.setActive(false);
         repository.save(studyDay);
 
         return mapper.toResponse(studyDay);
