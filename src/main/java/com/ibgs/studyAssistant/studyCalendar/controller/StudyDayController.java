@@ -1,5 +1,6 @@
 package com.ibgs.studyAssistant.studyCalendar.controller;
 
+import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayDescriptionRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayManualRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayResponse;
@@ -20,8 +21,8 @@ public class StudyDayController {
     private final StudyDayService service;
 
     @PostMapping
-    public ResponseEntity<StudyDayResponse> create(){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create());
+    public ResponseEntity<StudyDayResponse> create(@RequestBody StudyDayDescriptionRequest studyDayDescription){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(studyDayDescription));
     }
 
     @PostMapping("/manual")

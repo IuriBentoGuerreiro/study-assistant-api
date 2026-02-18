@@ -23,6 +23,9 @@ public class StudyDay extends BaseEntity {
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "study_date", nullable = false)
     private LocalDate studyDate;
 

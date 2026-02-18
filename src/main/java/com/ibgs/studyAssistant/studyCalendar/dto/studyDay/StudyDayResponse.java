@@ -8,6 +8,7 @@ public record StudyDayResponse(
 
         Integer userId,
 
+        String description,
         LocalDate studyDate,
         Integer studiedMinutes,
         LocalDateTime startTime,

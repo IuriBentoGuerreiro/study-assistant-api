@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public record StudyDayRequest(
 
+        String description,
         LocalDate studyDate,
         Integer studiedMinutes,
         Boolean completed,

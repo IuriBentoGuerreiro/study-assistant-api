@@ -3,6 +3,7 @@ package com.ibgs.studyAssistant.studyCalendar.service;
 import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
 import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.studyCalendar.domain.StudyDay;
+import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayDescriptionRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayManualRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayResponse;
@@ -27,7 +28,7 @@ public class StudyDayService {
     private final StudyDayMapper mapper;
 
     @Transactional
-    public StudyDayResponse create(){
+    public StudyDayResponse create(StudyDayDescriptionRequest studyDayDescription){
 
         if (findActiveSession() != null){
             throw new RuntimeException("Já existe uma sessão ativa.");
@@ -37,6 +38,7 @@ public class StudyDayService {
 
         StudyDay studyDay = new StudyDay();
 
+        studyDay.setDescription(studyDayDescription.description());
         studyDay.setUser(userService.getReference(user.id()));
         studyDay.setStartTime(LocalDateTime.now());
         studyDay.setEndTime(null);
@@ -54,6 +56,7 @@ public class StudyDayService {
         UserMeResponse user = userService.getCurrentUser();
         StudyDay studyDay = new StudyDay();
 
+        studyDay.setDescription(request.description());
         studyDay.setUser(userService.getReference(user.id()));
         studyDay.setStudyDate(request.studyDate());
 
