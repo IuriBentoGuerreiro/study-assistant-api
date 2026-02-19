@@ -15,7 +15,7 @@ public interface StudyDayMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "startTime", ignore = true)
     @Mapping(target = "endTime", ignore = true)
-    @Mapping(target = "studiedMinutes", ignore = true)
+    @Mapping(target = "studiedSeconds", ignore = true)
     StudyDay toEntity (StudyDayRequest request);
 
     @Mapping(source = "user.id", target = "userId")

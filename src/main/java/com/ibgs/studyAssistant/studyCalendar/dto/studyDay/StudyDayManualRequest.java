@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public record StudyDayManualRequest(
         String description,
         LocalDate studyDate,
-        Integer studiedMinutes,
+        Long studiedSeconds,
         LocalDateTime startTime,
         LocalDateTime endTime
 ) {

@@ -10,7 +10,7 @@ public record StudyDayResponse(
 
         String description,
         LocalDate studyDate,
-        Integer studiedMinutes,
+        Long studiedSeconds,
         LocalDateTime startTime,
         LocalDateTime endTime,
         Boolean active

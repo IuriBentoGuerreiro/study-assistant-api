@@ -29,8 +29,8 @@ public class StudyDay extends BaseEntity {
     @Column(name = "study_date", nullable = false)
     private LocalDate studyDate;
 
-    @Column(name = "studied_minutes", nullable = false)
-    private Integer studiedMinutes;
+    @Column(name = "studied_seconds", nullable = false)
+    private Long studiedSeconds;;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;

@@ -7,7 +7,7 @@ public record StudyDayRequest(
 
         String description,
         LocalDate studyDate,
-        Integer studiedMinutes,
+        Long studiedSeconds,
         Boolean completed,
         LocalDateTime startTime,
         LocalDateTime endTime,

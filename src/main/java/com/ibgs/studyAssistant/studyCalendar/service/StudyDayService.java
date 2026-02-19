@@ -42,7 +42,7 @@ public class StudyDayService {
         studyDay.setUser(userService.getReference(user.id()));
         studyDay.setStartTime(LocalDateTime.now());
         studyDay.setEndTime(null);
-        studyDay.setStudiedMinutes(0);
+        studyDay.setStudiedSeconds(0L);
         studyDay.setActive(true);
         studyDay.setStudyDate(LocalDate.now());
 
@@ -62,7 +62,7 @@ public class StudyDayService {
 
         studyDay.setStartTime(request.startTime());
         studyDay.setEndTime(request.endTime());
-        studyDay.setStudiedMinutes(request.studiedMinutes());
+        studyDay.setStudiedSeconds(request.studiedSeconds());
 
         studyDay.setActive(false);
         repository.save(studyDay);
@@ -71,11 +71,18 @@ public class StudyDayService {
     }
 
     @Transactional
-    public StudyDayResponse update(Integer id, StudyDayRequest request){
+    public StudyDayResponse update(Integer id, StudyDayRequest request) {
         StudyDay studyDay = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("sessão de estudo não encontrada"));
 
         BeanUtils.copyProperties(request, studyDay, "id");
+
+        studyDay.setActive(studyDay.getEndTime() == null);
+
+        if (studyDay.getEndTime() != null) {
+            long seconds = ChronoUnit.SECONDS.between(studyDay.getStartTime(), studyDay.getEndTime());
+            studyDay.setStudiedSeconds(seconds);
+        }
 
         var saved = repository.save(studyDay);
 
@@ -116,8 +123,8 @@ public class StudyDayService {
 
         studyDay.setEndTime(LocalDateTime.now());
 
-        long minutes = ChronoUnit.MINUTES.between(studyDay.getStartTime(), studyDay.getEndTime());
-        studyDay.setStudiedMinutes((int) minutes);
+        long seconds = ChronoUnit.SECONDS.between(studyDay.getStartTime(), studyDay.getEndTime());
+        studyDay.setStudiedSeconds(seconds);
 
         studyDay.setActive(false);
 
