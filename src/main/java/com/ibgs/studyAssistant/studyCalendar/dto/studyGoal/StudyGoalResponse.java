@@ -5,6 +5,6 @@ public record StudyGoalResponse(
 
         Integer user,
 
-        Integer dailyStudyMinutes
+        Long dailyStudySeconds
 ) {
 }

@@ -20,6 +20,6 @@ public class StudyGoal extends BaseEntity {
     @JoinColumn(name = "user_Id", unique = true)
     private User user;
 
-    @Column(name = "daily_study_minutes", nullable = false)
-    private Integer dailyStudyMinutes;
+    @Column(name = "daily_study_seconds", nullable = false)
+    private Long dailyStudySeconds;
 }
