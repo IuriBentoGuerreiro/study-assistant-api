@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "study_day")
@@ -40,4 +41,8 @@ public class StudyDay extends BaseEntity {
 
     @Column(name = "active")
     private Boolean active;
+
+
+    @OneToMany(mappedBy = "studyDay", cascade = CascadeType.ALL)
+    private List<Pause> pauses;
 }

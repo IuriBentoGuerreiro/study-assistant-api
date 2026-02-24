@@ -2,7 +2,9 @@ package com.ibgs.studyAssistant.studyCalendar.service;
 
 import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
 import com.ibgs.studyAssistant.auth.service.UserService;
+import com.ibgs.studyAssistant.studyCalendar.domain.Pause;
 import com.ibgs.studyAssistant.studyCalendar.domain.StudyDay;
+import com.ibgs.studyAssistant.studyCalendar.dto.pause.ActivePauseResponse;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayDescriptionRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayManualRequest;
 import com.ibgs.studyAssistant.studyCalendar.dto.studyDay.StudyDayRequest;
@@ -14,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -26,6 +29,7 @@ public class StudyDayService {
     private final StudyDayRepository repository;
     private final UserService userService;
     private final StudyDayMapper mapper;
+    private final PauseService pauseService;
 
     @Transactional
     public StudyDayResponse create(StudyDayDescriptionRequest studyDayDescription){
@@ -108,26 +112,57 @@ public class StudyDayService {
 
         repository.delete(studyDay);
     }
-
     @Transactional(readOnly = true)
     public StudyDayResponse findActiveSession() {
+        return repository.findByActive(true).map(studyDay -> {
+            List<Pause> pauses = pauseService.findByStudyDayId(studyDay.getId());
 
-        return repository.findByActive(true).map(mapper::toResponse).orElse(null);
+            long totalPausedSeconds = pauses.stream()
+                    .filter(p -> p.getEndPause() != null)
+                    .mapToLong(p -> Duration.between(p.getStartPause(), p.getEndPause()).getSeconds())
+                    .sum();
+
+            ActivePauseResponse activePause = pauses.stream()
+                    .filter(p -> p.getEndPause() == null)
+                    .findFirst()
+                    .map(p -> new ActivePauseResponse(p.getId(), p.getStartPause()))
+                    .orElse(null);
+
+            return new StudyDayResponse(
+                    studyDay.getId(),
+                    studyDay.getUser().getId(),
+                    studyDay.getDescription(),
+                    studyDay.getStudyDate(),
+                    studyDay.getStudiedSeconds(),
+                    studyDay.getStartTime(),
+                    studyDay.getEndTime(),
+                    studyDay.getActive(),
+                    totalPausedSeconds,
+                    activePause
+            );
+        }).orElse(null);
     }
 
     @Transactional
-    public StudyDayResponse finishSession(Integer id){
-        StudyDay studyDay = repository.findById(id).orElseThrow(
-                ()-> new RuntimeException("Dia de estudos não encontrado.")
-        );
+    public StudyDayResponse finishSession(Integer id) {
+        StudyDay studyDay = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dia de estudos não encontrado."));
 
-        studyDay.setEndTime(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        studyDay.setEndTime(now);
 
-        long seconds = ChronoUnit.SECONDS.between(studyDay.getStartTime(), studyDay.getEndTime());
-        studyDay.setStudiedSeconds(seconds);
+        studyDay.getPauses().stream()
+                .filter(p -> p.getEndPause() == null)
+                .forEach(p -> p.setEndPause(now));
 
+        long totalSeconds = ChronoUnit.SECONDS.between(studyDay.getStartTime(), now);
+
+        long totalPauseSeconds = studyDay.getPauses().stream()
+                .mapToLong(p -> ChronoUnit.SECONDS.between(p.getStartPause(), p.getEndPause()))
+                .sum();
+
+        studyDay.setStudiedSeconds(Math.max(totalSeconds - totalPauseSeconds, 0));
         studyDay.setActive(false);
 
         return mapper.toResponse(studyDay);
-    }
-}
+    }}
