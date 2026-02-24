@@ -4,6 +4,8 @@ import com.ibgs.studyAssistant.question.domain.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface QuestionRepository extends JpaRepository<Question, Integer> {
 
     @Query("""
@@ -23,4 +25,6 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
       AND q.studyAnswer = q.correctAnswerIndex
 """)
     long countCorrectQuestionsByUser(Integer userId);
+
+    List<Question> findByStudySessionId(Integer studySessionId);
 }

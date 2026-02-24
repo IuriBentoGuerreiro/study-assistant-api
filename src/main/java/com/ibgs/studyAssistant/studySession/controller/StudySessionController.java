@@ -25,6 +25,11 @@ public class StudySessionController {
         return ResponseEntity.ok().body(studySessions);
     }
 
+    @GetMapping("/{id}/full")
+    public ResponseEntity<StudySessionResponseDTO> getFullSession(@PathVariable Integer id) {
+        return ResponseEntity.ok(studySessionService.findFullSession(id));
+    }
+
     @PostMapping("/generateIa")
     public ResponseEntity<StudySessionResponseDTO> generate(@RequestBody PromptRequest request) {
         StudySessionResponseDTO response = studySessionService.generateSession(request);
