@@ -20,6 +20,7 @@ public class StudyGoalService {
     private final UserService userService;
     private final StudyGoalMapper mapper;
 
+    @Transactional
     public StudyGoalResponse create(StudyGoalRequest request) {
 
         Integer userId = userService.getCurrentUser().id();
@@ -47,9 +48,11 @@ public class StudyGoalService {
     public StudyGoalResponse findByUser() {
         UserMeResponse user = userService.getCurrentUser();
 
-        StudyGoal studyGoal = repository.findByUserId(user.id())
-                .orElse(null);
-
-        return mapper.toResponse(studyGoal);
-    }
-}
+        return repository.findByUserId(user.id())
+                .map(mapper::toResponse)
+                .orElseGet(() -> new StudyGoalResponse(
+                        null,
+                        user.id(),
+                        3600L
+                ));
+    }}

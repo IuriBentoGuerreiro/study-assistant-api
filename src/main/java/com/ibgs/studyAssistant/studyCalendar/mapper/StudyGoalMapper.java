@@ -12,6 +12,5 @@ public interface StudyGoalMapper {
     @Mapping(target = "user", ignore = true)
     StudyGoal toEntity (StudyGoalRequest request);
 
-    @Mapping(source = "user.id", target = "user")
-    StudyGoalResponse toResponse (StudyGoal studyGoal);
-}
+    @Mapping(source = "user.id", target = "userId")
+    StudyGoalResponse toResponse(StudyGoal studyGoal);}
