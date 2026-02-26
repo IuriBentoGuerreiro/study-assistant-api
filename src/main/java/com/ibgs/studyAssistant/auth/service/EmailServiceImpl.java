@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,38 +12,37 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EmailServiceImpl.class);
 
     @Value("${app.frontend.reset-password-url}")
     private String resetPasswordUrl;
 
+    @Async
     @Override
     public void sendPasswordResetEmail(String to, String token) {
+        try {
+            String link = resetPasswordUrl + "?token=" + token;
+            SimpleMailMessage message = createMessage(to, link);
 
-        String link = resetPasswordUrl + "?token=" + token;
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao enviar e-mail");
+        }
+    }
 
-        String subject = "Recuperação de senha";
-
-        String body = """
-            Olá,
-
-            Recebemos uma solicitação para redefinir sua senha.
-
-            Para criar uma nova senha, clique no link abaixo:
-            %s
-
-            Este link expira em 30 minutos.
-
-            Se você não solicitou a recuperação, ignore este email.
-
-            Atenciosamente,
-            Equipe de Suporte
-            """.formatted(link);
-
+    private SimpleMailMessage createMessage(String to, String link) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject(subject);
-        message.setText(body);
-
-        mailSender.send(message);
+        message.setSubject("Recuperação de senha");
+        message.setText("""
+            Olá,
+            
+            Recebemos uma solicitação para redefinir sua senha.
+            Clique no link abaixo para criar uma nova:
+            %s
+            
+            Este link expira em 30 minutos.
+            """.formatted(link));
+        return message;
     }
 }
