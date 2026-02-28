@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class PauseService {
     private final StudyDayRepository studyDayRepository;
 
     @Transactional
-    public PauseResponse initPause(Integer studyDayId) {
+    public PauseResponse initPause(UUID studyDayId) {
 
         if (repository.existsByStudyDayIdAndEndPauseIsNull(studyDayId)) {
             throw new RuntimeException("Já existe uma pausa ativa.");
@@ -37,7 +38,7 @@ public class PauseService {
     }
 
     @Transactional
-    public void finishPause(Integer id) {
+    public void finishPause(UUID id) {
 
         Pause pause = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pausa não encontrada"));
@@ -50,7 +51,7 @@ public class PauseService {
     }
 
     @Transactional(readOnly = true)
-    public List<Pause> findByStudyDayId(Integer studyDayId){
+    public List<Pause> findByStudyDayId(UUID studyDayId){
         return repository.findByStudyDayId(studyDayId);
     }
 }

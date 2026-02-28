@@ -3,10 +3,11 @@ package com.ibgs.studyAssistant.question.dto;
 import com.ibgs.studyAssistant.question.enuns.QuestionType;
 
 import java.util.List;
+import java.util.UUID;
 
 public record QuestionResponse(
 
-        Integer id,
+        UUID id,
         String statement,
         QuestionType type,
         List<String> options,

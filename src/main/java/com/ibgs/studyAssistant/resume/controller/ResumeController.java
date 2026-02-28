@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/resume")
@@ -18,7 +19,7 @@ public class ResumeController {
     private final ResumeService resumeService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resume> findById(@PathVariable Integer id) {
+    public ResponseEntity<Resume> findById(@PathVariable UUID id) {
         Resume resume = resumeService.findById(id);
 
         return ResponseEntity.ok(resume);

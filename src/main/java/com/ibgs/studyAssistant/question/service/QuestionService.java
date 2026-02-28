@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +17,7 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
 
     @Transactional
-    public List<Question> findAllBySession(Integer studySessionId){
+    public List<Question> findAllBySession(UUID studySessionId){
 
         return questionRepository.findByStudySessionId(studySessionId);
     }

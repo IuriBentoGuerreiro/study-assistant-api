@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/question")
@@ -24,7 +25,7 @@ public class QuestionController {
 
     @GetMapping("/{studySessionId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Question> findAllBySession(@PathVariable Integer studySessionId){
+    public List<Question> findAllBySession(@PathVariable UUID studySessionId){
         return questionService.findAllBySession(studySessionId);
     }
 }

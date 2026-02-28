@@ -1,9 +1,11 @@
 package com.ibgs.studyAssistant.studyCalendar.dto.studyGoal;
 
-public record StudyGoalResponse(
-        Integer id,
+import java.util.UUID;
 
-        Integer userId,
+public record StudyGoalResponse(
+        UUID id,
+
+        UUID userId,
 
         Long dailyStudySeconds
 ) {

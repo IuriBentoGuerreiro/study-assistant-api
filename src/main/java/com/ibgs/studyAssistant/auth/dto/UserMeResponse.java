@@ -1,9 +1,10 @@
 package com.ibgs.studyAssistant.auth.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 public record UserMeResponse(
-        Integer id,
+        UUID id,
         String username,
         List<String> roles
 ) {}

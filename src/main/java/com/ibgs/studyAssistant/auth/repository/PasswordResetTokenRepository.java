@@ -5,10 +5,11 @@ import com.ibgs.studyAssistant.auth.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Integer> {
+public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, UUID> {
 
     Optional<PasswordResetToken> findByToken(String token);
 
-    void deleteAllByUserId(Integer userId);
+    void deleteAllByUserId(UUID userId);
 }

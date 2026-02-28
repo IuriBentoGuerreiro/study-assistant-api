@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/study-day")
@@ -31,7 +32,7 @@ public class StudyDayController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StudyDayResponse> update(@PathVariable Integer id, @RequestBody StudyDayRequest request){
+    public ResponseEntity<StudyDayResponse> update(@PathVariable UUID id, @RequestBody StudyDayRequest request){
         return ResponseEntity.ok().body(service.update(id, request));
     }
 
@@ -42,7 +43,7 @@ public class StudyDayController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Integer id){
+    public void delete(@PathVariable UUID id){
         service.deleteById(id);
     }
 
@@ -54,7 +55,7 @@ public class StudyDayController {
     }
 
     @PutMapping("/finish/{id}")
-    public ResponseEntity<StudyDayResponse> finishSession(@PathVariable Integer id){
+    public ResponseEntity<StudyDayResponse> finishSession(@PathVariable UUID id){
         return ResponseEntity.ok().body(service.finishSession(id));
     }
 }

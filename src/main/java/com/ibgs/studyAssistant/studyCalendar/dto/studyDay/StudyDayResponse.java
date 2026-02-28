@@ -4,11 +4,12 @@ import com.ibgs.studyAssistant.studyCalendar.dto.pause.ActivePauseResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record StudyDayResponse(
-        Integer id,
+        UUID id,
 
-        Integer userId,
+        UUID userId,
 
         String description,
         LocalDate studyDate,

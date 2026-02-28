@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class StudySessionService {
     }
 
     @Transactional(readOnly = true)
-    public StudySessionResponseDTO findFullSession(Integer sessionId) {
+    public StudySessionResponseDTO findFullSession(UUID sessionId) {
         StudySession session = studySessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Sessão não encontrada"));
 
@@ -150,7 +151,7 @@ public class StudySessionService {
     }
 
     @Transactional
-    public void delete(Integer id) {
+    public void delete(UUID id) {
         studySessionRepository.deleteById(id);
     }
 

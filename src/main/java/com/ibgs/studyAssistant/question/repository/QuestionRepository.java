@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface QuestionRepository extends JpaRepository<Question, Integer> {
+public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     @Query("""
     SELECT COUNT(q)
@@ -14,7 +15,7 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     JOIN q.studySession s
     WHERE s.user.id = :userId
 """)
-    long countByUserId(Integer userId);
+    long countByUserId(UUID userId);
 
     @Query("""
     SELECT COUNT(q)
@@ -24,7 +25,7 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
       AND q.studyAnswer IS NOT NULL
       AND q.studyAnswer = q.correctAnswerIndex
 """)
-    long countCorrectQuestionsByUser(Integer userId);
+    long countCorrectQuestionsByUser(UUID userId);
 
-    List<Question> findByStudySessionId(Integer studySessionId);
+    List<Question> findByStudySessionId(UUID studySessionId);
 }

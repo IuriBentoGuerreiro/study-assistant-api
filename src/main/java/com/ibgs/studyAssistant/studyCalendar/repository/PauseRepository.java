@@ -5,10 +5,11 @@ import com.ibgs.studyAssistant.studyCalendar.domain.StudyDay;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface PauseRepository extends JpaRepository<Pause, Integer> {
+public interface PauseRepository extends JpaRepository<Pause, UUID> {
 
-    boolean existsByStudyDayIdAndEndPauseIsNull(Integer studyDayId);
+    boolean existsByStudyDayIdAndEndPauseIsNull(UUID studyDayId);
 
-    List<Pause> findByStudyDayId(Integer studyDayId);
+    List<Pause> findByStudyDayId(UUID studyDayId);
 }

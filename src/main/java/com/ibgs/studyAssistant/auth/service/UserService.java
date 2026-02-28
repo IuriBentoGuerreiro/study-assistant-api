@@ -11,6 +11,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -21,7 +23,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findById(Integer userId){
+    public User findById(UUID userId){
         return userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("Usuário Não Encontrado")
         );
@@ -57,7 +59,7 @@ public class UserService {
         );
     }
 
-    public User getReference(Integer id) {
+    public User getReference(UUID id) {
         return userRepository.getReferenceById(id);
     }
 }

@@ -7,8 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface ResumeRepository extends JpaRepository<Resume, Integer> {
+public interface ResumeRepository extends JpaRepository<Resume, UUID> {
 
     @Query("""
     select new com.ibgs.studyAssistant.resume.dto.ResumeTitleDTO(
@@ -19,5 +20,5 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
     from Resume r
     where r.user.id = :userId
 """)
-    List<ResumeTitleDTO> findResumeByUserId(@Param("userId") Integer userId);
+    List<ResumeTitleDTO> findResumeByUserId(@Param("userId") UUID userId);
 }

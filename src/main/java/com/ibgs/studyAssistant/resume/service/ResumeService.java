@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class ResumeService {
     private final UserService userService;
 
     @Transactional
-    public Resume findById(Integer id){
+    public Resume findById(UUID id){
         return resumeRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Recurso não encontrado")
         );

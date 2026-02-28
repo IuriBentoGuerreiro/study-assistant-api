@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/session")
@@ -26,7 +27,7 @@ public class StudySessionController {
     }
 
     @GetMapping("/{id}/full")
-    public ResponseEntity<StudySessionResponseDTO> getFullSession(@PathVariable Integer id) {
+    public ResponseEntity<StudySessionResponseDTO> getFullSession(@PathVariable UUID id) {
         return ResponseEntity.ok(studySessionService.findFullSession(id));
     }
 
@@ -39,7 +40,7 @@ public class StudySessionController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Integer id){
+    public void delete(@PathVariable UUID id){
         studySessionService.delete(id);
     }
 }

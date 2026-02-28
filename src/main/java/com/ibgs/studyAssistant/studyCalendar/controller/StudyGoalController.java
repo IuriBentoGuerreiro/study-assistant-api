@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/study-goal")
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class StudyGoalController {
 
     @PutMapping("/{id}")
     public ResponseEntity<StudyGoalResponse> update(
-            @PathVariable Integer id, @Valid @RequestBody StudyGoalRequest request
+            @PathVariable UUID id, @Valid @RequestBody StudyGoalRequest request
     ) {
         StudyGoalResponse response = service.update(id, request);
         return ResponseEntity.ok(response);

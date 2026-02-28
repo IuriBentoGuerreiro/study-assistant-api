@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +76,7 @@ public class StudyDayService {
     }
 
     @Transactional
-    public StudyDayResponse update(Integer id, StudyDayRequest request) {
+    public StudyDayResponse update(UUID id, StudyDayRequest request) {
         StudyDay studyDay = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("sessão de estudo não encontrada"));
 
@@ -95,7 +96,7 @@ public class StudyDayService {
 
     @Transactional(readOnly = true)
     public List<StudyDayResponse> findByUser(LocalDate start, LocalDate end){
-        Integer userId = userService.getCurrentUser().id();
+        UUID userId = userService.getCurrentUser().id();
 
         LocalDate startDate = (start != null) ? start : LocalDate.now().withDayOfMonth(1);
         LocalDate endDate = (end != null) ? end : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
@@ -105,7 +106,7 @@ public class StudyDayService {
         return mapper.toResponse(studyDays);
     }
 
-    public void deleteById(Integer id){
+    public void deleteById(UUID id){
         StudyDay studyDay = repository.findById(id).orElseThrow(
                 () -> new RuntimeException("sessão de estudo não encontrada")
         );
@@ -144,7 +145,7 @@ public class StudyDayService {
     }
 
     @Transactional
-    public StudyDayResponse finishSession(Integer id) {
+    public StudyDayResponse finishSession(UUID id) {
         StudyDay studyDay = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Dia de estudos não encontrado."));
 

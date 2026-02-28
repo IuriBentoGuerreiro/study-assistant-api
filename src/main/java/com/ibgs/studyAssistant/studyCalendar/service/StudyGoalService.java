@@ -12,6 +12,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class StudyGoalService {
@@ -23,7 +25,7 @@ public class StudyGoalService {
     @Transactional
     public StudyGoalResponse create(StudyGoalRequest request) {
 
-        Integer userId = userService.getCurrentUser().id();
+        UUID userId = userService.getCurrentUser().id();
 
         StudyGoal studyGoal = mapper.toEntity(request);
         studyGoal.setUser(userService.findById(userId));
@@ -34,7 +36,7 @@ public class StudyGoalService {
     }
 
     @Transactional
-    public StudyGoalResponse update(Integer id, StudyGoalRequest request){
+    public StudyGoalResponse update(UUID id, StudyGoalRequest request){
         StudyGoal studyGoal = repository.findById(id).orElseThrow(
                 () -> new RuntimeException("Meta não encontrada")
         );
