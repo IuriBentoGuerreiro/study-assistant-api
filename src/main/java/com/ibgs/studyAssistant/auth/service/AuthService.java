@@ -1,6 +1,9 @@
 package com.ibgs.studyAssistant.auth.service;
 
-import com.ibgs.studyAssistant.auth.dto.*;
+import com.ibgs.studyAssistant.auth.dto.LoginRequest;
+import com.ibgs.studyAssistant.auth.dto.LoginResponse;
+import com.ibgs.studyAssistant.auth.dto.RefreshTokenRequest;
+import com.ibgs.studyAssistant.auth.dto.ResetPasswordRequest;
 import com.ibgs.studyAssistant.auth.enuns.RoleName;
 import com.ibgs.studyAssistant.auth.model.PasswordResetToken;
 import com.ibgs.studyAssistant.auth.model.Role;
@@ -13,10 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -91,20 +93,26 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public void forgotPassword(String username) {
 
         User user = userService.findByUsername(username);
 
-        String token = UUID.randomUUID().toString();
+        passwordResetTokenRepository.deleteAllByUserId(user.getId());
+
+        String rawToken = UUID.randomUUID().toString();
+
+        String hashedToken = passwordEncoder.encode(rawToken);
 
         PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
+        resetToken.setToken(hashedToken);
         resetToken.setUser(user);
         resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
+        resetToken.setUsed(false);
 
         passwordResetTokenRepository.save(resetToken);
 
-        emailService.sendPasswordResetEmail(user.getUsername(), token);
+        emailService.sendPasswordResetEmail(user.getUsername(), rawToken);
     }
 
     public void resetPassword(ResetPasswordRequest request) {
@@ -123,6 +131,7 @@ public class AuthService {
         user.setPassword(
                 passwordEncoder.encode(request.newPassword())
         );
+        resetToken.setUsed(true);
 
         userService.save(user);
 

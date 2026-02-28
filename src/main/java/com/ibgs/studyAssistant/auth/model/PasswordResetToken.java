@@ -1,10 +1,7 @@
 package com.ibgs.studyAssistant.auth.model;
 
 import com.ibgs.studyAssistant.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,9 +18,12 @@ public class PasswordResetToken extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String token;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     private LocalDateTime expiresAt;
+
+    private Boolean used;
 }
 
