@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -102,32 +100,25 @@ public class AuthService {
 
         passwordResetTokenRepository.deleteAllByUserId(user.getId());
 
-        String rawToken = UUID.randomUUID().toString();
+        String token = UUID.randomUUID().toString();
 
-        String hashedToken = passwordEncoder.encode(rawToken);
 
         PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(hashedToken);
+        resetToken.setToken(token);
         resetToken.setUser(user);
         resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
         resetToken.setUsed(false);
 
         passwordResetTokenRepository.save(resetToken);
 
-        emailService.sendPasswordResetEmail(user.getUsername(), rawToken);
+        emailService.sendPasswordResetEmail(user.getUsername(), token);
     }
 
     public void resetPassword(ResetPasswordRequest request) {
 
-        Optional<PasswordResetToken> tokens =
-                passwordResetTokenRepository.findByToken(request.token());
 
-        PasswordResetToken resetToken = tokens.stream()
-                .filter(token -> passwordEncoder.matches(
-                        request.token(),
-                        token.getToken()
-                ))
-                .findFirst()
+        PasswordResetToken resetToken = passwordResetTokenRepository
+                .findByToken(request.token())
                 .orElseThrow(() -> new InvalidTokenException("Token inválido"));
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -137,9 +128,13 @@ public class AuthService {
 
         User user = resetToken.getUser();
 
-        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setPassword(
+                passwordEncoder.encode(request.newPassword())
+        );
         resetToken.setUsed(true);
 
         userService.save(user);
+
         passwordResetTokenRepository.delete(resetToken);
-    }}
+    }
+}
