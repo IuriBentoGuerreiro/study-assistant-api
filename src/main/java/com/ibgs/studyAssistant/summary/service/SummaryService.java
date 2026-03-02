@@ -1,11 +1,11 @@
-package com.ibgs.studyAssistant.resume.service;
+package com.ibgs.studyAssistant.summary.service;
 
 import com.ibgs.studyAssistant.auth.dto.UserMeResponse;
 import com.ibgs.studyAssistant.auth.service.UserService;
 import com.ibgs.studyAssistant.gemini.GeminiService;
-import com.ibgs.studyAssistant.resume.domain.Resume;
-import com.ibgs.studyAssistant.resume.dto.ResumeTitleDTO;
-import com.ibgs.studyAssistant.resume.repository.ResumeRepository;
+import com.ibgs.studyAssistant.summary.domain.Summary;
+import com.ibgs.studyAssistant.summary.dto.SummaryTitleDTO;
+import com.ibgs.studyAssistant.summary.repository.SummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,46 +16,46 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ResumeService {
+public class SummaryService {
 
-    private final ResumeRepository resumeRepository;
+    private final SummaryRepository summaryRepository;
     private final GeminiService geminiService;
     private final UserService userService;
 
     @Transactional
-    public Resume findById(UUID id){
-        return resumeRepository.findById(id).orElseThrow(
+    public Summary findById(UUID id){
+        return summaryRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Recurso não encontrado")
         );
     }
 
     @Transactional
-    public List<ResumeTitleDTO> findAllByUser() {
+    public List<SummaryTitleDTO> findAllByUser() {
         UserMeResponse user = userService.getCurrentUser();
 
-        return resumeRepository.findResumeByUserId(user.id());
+        return summaryRepository.findSummaryByUserId(user.id());
     }
 
-    public Resume generateResume(String prompt) {
-        String resumeText = geminiService.generateResume(prompt);
+    public Summary generateSumarry(String prompt) {
+        String summaryText = geminiService.generateSummary(prompt);
 
         UserMeResponse user = userService.getCurrentUser();
 
-        Resume resume = new Resume();
+        Summary summary = new Summary();
 
-        resume.setText(resumeText);
-        resume.setUser(userService.findById(user.id()));
-        resume.setTitle(generateResumeTitle(prompt));
+        summary.setText(summaryText);
+        summary.setUser(userService.findById(user.id()));
+        summary.setTitle(generateSummaryTitle(prompt));
 
-        return resumeRepository.save(resume);
+        return summaryRepository.save(summary);
     }
 
     @Transactional
     public void delete(UUID id){
-        resumeRepository.deleteById(id);
+        summaryRepository.deleteById(id);
     }
 
-    private String generateResumeTitle(String prompt) {
+    private String generateSummaryTitle(String prompt) {
         if (prompt == null || prompt.isBlank()) {
             return "Novo Resumo de estudo";
         }

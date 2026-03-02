@@ -3,9 +3,9 @@ package com.ibgs.studyAssistant.gemini;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibgs.studyAssistant.studySession.dto.PromptRequest;
 import com.ibgs.studyAssistant.question.dto.QuestionGenerateDTO;
 import com.ibgs.studyAssistant.question.enuns.QuestionType;
+import com.ibgs.studyAssistant.studySession.dto.PromptRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -124,7 +124,7 @@ public class GeminiService {
             ]
             """;
 
-    private static final String PROMPT_RESUME = """
+    private static final String PROMPT_SUMMARY = """
             Você é um assistente de estudos especializado em preparação para concursos públicos.
             
             Sua tarefa é **resumir o conteúdo abaixo** de forma estratégica para estudo e memorização, seguindo rigorosamente as diretrizes:
@@ -199,8 +199,8 @@ public class GeminiService {
         }
     }
 
-    public String generateResume(String content) {
-        String prompt = PROMPT_RESUME + "\n" + truncateText(content);
+    public String generateSummary(String content) {
+        String prompt = PROMPT_SUMMARY + "\n" + truncateText(content);
         return callGemini(prompt);
     }
 

@@ -1,4 +1,4 @@
-package com.ibgs.studyAssistant.resume.domain;
+package com.ibgs.studyAssistant.summary.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibgs.studyAssistant.auth.model.User;
@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "resume")
+@Table(name = "summary")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Resume extends BaseEntity {
+public class Summary extends BaseEntity {
 
     @Column(name = "title")
     private String title;
