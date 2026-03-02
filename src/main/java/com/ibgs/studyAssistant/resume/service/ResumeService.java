@@ -50,6 +50,11 @@ public class ResumeService {
         return resumeRepository.save(resume);
     }
 
+    @Transactional
+    public void delete(UUID id){
+        resumeRepository.deleteById(id);
+    }
+
     private String generateResumeTitle(String prompt) {
         if (prompt == null || prompt.isBlank()) {
             return "Novo Resumo de estudo";

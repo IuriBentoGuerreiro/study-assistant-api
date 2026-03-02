@@ -1,8 +1,8 @@
 package com.ibgs.studyAssistant.resume.controller;
 
 import com.ibgs.studyAssistant.resume.domain.Resume;
-import com.ibgs.studyAssistant.resume.service.ResumeService;
 import com.ibgs.studyAssistant.resume.dto.ResumeTitleDTO;
+import com.ibgs.studyAssistant.resume.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +37,11 @@ public class ResumeController {
         Resume resume = resumeService.generateResume(prompt);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(resume);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id){
+        resumeService.delete(id);
     }
 }
