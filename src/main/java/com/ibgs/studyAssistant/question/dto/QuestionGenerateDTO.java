@@ -8,6 +8,7 @@ public record QuestionGenerateDTO(
         QuestionType type,
         String statement,
         List<String> options,
-        Integer correctAnswerIndex
+        Integer correctAnswerIndex,
+        String comment
 ) {
 }

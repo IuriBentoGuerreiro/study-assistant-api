@@ -82,6 +82,7 @@ public class StudySessionService {
             question.setCorrectAnswerIndex(q.correctAnswerIndex());
             question.setType(q.type());
             question.setStudySession(session);
+            question.setComment(q.comment());
 
             List<QuestionOption> options =
                     q.options() == null
@@ -118,7 +119,8 @@ public class StudySessionService {
                                         .map(QuestionOption::getOptions)
                                         .toList(),
                                 q.getCorrectAnswerIndex(),
-                                q.getStudyAnswer()
+                                q.getStudyAnswer(),
+                                q.getComment()
                         )
                 ).toList()
         );

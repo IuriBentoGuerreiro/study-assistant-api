@@ -12,6 +12,6 @@ public record QuestionResponse(
         QuestionType type,
         List<String> options,
         Integer correctAnswerIndex,
-        Integer studyAnswer
-
+        Integer studyAnswer,
+        String comment
 ) {}

@@ -20,21 +20,24 @@ import java.util.List;
 @NoArgsConstructor
 public class Question extends BaseEntity {
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String statement;
 
     @Column(name = "study_answer")
     private Integer studyAnswer;
 
-    @Column(name = "correct_answer_index")
+    @Column(name = "correct_answer_index", nullable = false)
     private Integer correctAnswerIndex;
+
+    @Column(name = "comment", columnDefinition = "TEXT")
+    private String comment;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestionOption> options;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "study_session_id")
+    @JoinColumn(name = "study_session_id", nullable = false)
     private StudySession studySession;
 
     @Enumerated(EnumType.STRING)

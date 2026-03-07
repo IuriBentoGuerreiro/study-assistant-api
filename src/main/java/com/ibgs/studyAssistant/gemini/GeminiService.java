@@ -46,8 +46,9 @@ public class GeminiService {
               - pegadinhas conceituais comuns da banca
               - cobrança literal de conceitos, normas ou definições quando aplicável
             - Evite questões genéricas, introdutórias ou de nível básico.
-            - Não explique as respostas.
-            - Não faça comentários, introduções ou conclusões.
+            - O campo "comment" deve obrigatoriamente conter a explicação técnica da resposta.
+            - use linguagem markdown no campo comment para organizar a explicação de forma didática.
+            - NÃO inclua qualquer texto, saudação ou conclusão fora do JSON.
             
             Estrutura de cada questão:
             - "statement": enunciado claro, objetivo e compatível com provas oficiais.
@@ -68,7 +69,8 @@ public class GeminiService {
                 "type": "MULTIPLE_CHOICE",
                 "statement": "Pergunta aqui?",
                 "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
-                "correctAnswerIndex": 1
+                "correctAnswerIndex": 1,
+                "comment": "Comentário detalhado justificando a resposta"
               }
             ]
             """;
@@ -98,8 +100,10 @@ public class GeminiService {
               - pegadinhas conceituais comuns da banca
               - afirmações absolutas, restritivas ou sutis quando aplicável
             - Evite assertivas óbvias, introdutórias ou excessivamente genéricas.
-            - Não explique as respostas.
-            - Não faça comentários, introduções ou conclusões.
+            - O campo "comment" deve obrigatoriamente conter a explicação técnica da resposta.
+            - use linguagem markdown no campo comment para organizar a explicação de forma didática.
+            
+            - NÃO inclua qualquer texto, saudação ou conclusão fora do JSON.
             
             Estrutura de cada questão:
             - "statement": uma assertiva clara, objetiva e passível de julgamento como CERTO ou ERRADO.
@@ -119,7 +123,8 @@ public class GeminiService {
               {
                 "type": "TRUE_FALSE",
                 "statement": "Assertiva para julgamento.",
-                "correctAnswerIndex": 0
+                "correctAnswerIndex": 0,
+                "comment": "Comentário detalhado justificando a resposta"
               }
             ]
             """;
@@ -188,7 +193,8 @@ public class GeminiService {
             List<QuestionGenerateDTO> questions =
                     objectMapper.readValue(
                             json,
-                            new TypeReference<List<QuestionGenerateDTO>>() {}
+                            new TypeReference<List<QuestionGenerateDTO>>() {
+                            }
                     );
 
             validateQuestions(questions, request.type());
