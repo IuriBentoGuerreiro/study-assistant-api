@@ -23,7 +23,7 @@ public class GeminiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    private static final String PROMPT_GENERATE = """
+    private static final String PROMPT_BASE = """
             Você é um especialista em elaboração de questões para concursos públicos, com profundo conhecimento do estilo, do nível de dificuldade e dos padrões de cobrança da banca {banca}.
             
             Contexto do concurso (considere apenas se as informações forem fornecidas):
@@ -31,37 +31,78 @@ public class GeminiService {
             - Cidade: {cidade}
             - Estado: {estado}
             - Nível do concurso: {nivel} (médio ou superior)
+            - Órgão do concurso: {orgao}
             
             Caso alguma dessas informações não seja fornecida, desconsidere-a completamente.
             
-            Gere exatamente {quantidade} questões de múltipla escolha com base no conteúdo fornecido pelo usuário.
+            REGRA PRINCIPAL — USO EXCLUSIVO DE QUESTÕES REAIS:
+            - Você deve retornar EXCLUSIVAMENTE questões que já foram cobradas em concursos públicos reais.
+            - Priorize questões que correspondam ao cargo, nível, cidade, estado e órgão informados.
+            - Caso não encontre questões reais com todos esses filtros, AFROUXE os filtros progressivamente
+              na seguinte ordem:
+              1. Ignore cidade e estado, mantenha cargo, nível e órgão
+              2. Ignore também o órgão, mantenha cargo e nível
+              3. Ignore também o cargo, mantenha apenas o nível
+              4. Use qualquer questão real da banca {banca} sobre o conteúdo fornecido
+            - Em NENHUMA hipótese crie questões inéditas ou fictícias.
+            - Se absolutamente não houver questões reais da banca {banca} sobre o conteúdo, informe dentro
+              do JSON no campo "comment" que não foram encontradas questões reais, mas ainda assim retorne
+              a melhor aproximação real disponível de outra banca reconhecida.
+            
+            TEXTOS DE APOIO:
+            - Quando a questão original exigir um texto de apoio, NÃO reproduza o texto completo.
+            - Inclua apenas o trecho estritamente necessário para contextualizar e responder a questão.
+            - O trecho deve ser inserido diretamente no campo "statement", antes do enunciado, usando markdown:
+            
+              *Texto:*
+            
+              [apenas o fragmento relevante, sem o texto completo]
+            
+              ---
+              [enunciado da pergunta]
+            
+            - Quando a questão não exigir texto de apoio, o campo "statement" conterá apenas o enunciado normalmente.
             
             Diretrizes obrigatórias:
-            - As questões devem ser de nível alto, compatíveis com provas reais da banca {banca}.
-            - Adeque o nível de profundidade ao nível do concurso ({nivel}), quando informado.
-            - Sempre que possível, utilize questões que já tenham sido cobradas em concursos públicos anteriores, compatíveis com o cargo informado.
-            - Caso não seja possível reproduzir uma questão real, crie uma questão inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
-              - linguagem técnica
-              - nível de aprofundamento compatível com o cargo
-              - pegadinhas conceituais comuns da banca
-              - cobrança literal de conceitos, normas ou definições quando aplicável
-            - Evite questões genéricas, introdutórias ou de nível básico.
+            - O nível das questões deve ser alto, compatível com provas reais da banca {banca}.
+            - Adeque o grau de tecnicidade ao cargo e ao nível do concurso ({nivel}), quando informados.
             - O campo "comment" deve obrigatoriamente conter a explicação técnica da resposta.
-            - use linguagem markdown no campo comment para organizar a explicação de forma didática.
+            - Use linguagem markdown no campo "comment" para organizar a explicação de forma didática.
             - NÃO inclua qualquer texto, saudação ou conclusão fora do JSON.
-            
-            Estrutura de cada questão:
-            - "statement": enunciado claro, objetivo e compatível com provas oficiais.
-            - "options": exatamente 4 alternativas.
-            - "correctAnswerIndex": número inteiro de 0 a 3, indicando a alternativa correta.
             
             Regras de formatação:
             - Retorne APENAS um JSON válido.
-            - NÃO utilize Markdown.
+            - NÃO utilize Markdown fora dos campos "statement" e "comment".
             - NÃO inclua qualquer texto fora do JSON.
-            - NÃO utilize comentários.
+            - NÃO utilize comentários no JSON.
             - Sempre escreva em português do Brasil.
-            - As alternativas devem seguir o formato "(A)", "(B)", "(C)", "(D)".
+            
+            Exemplo de questão com texto de apoio no statement:
+            {
+              "type": "MULTIPLE_CHOICE",
+              "statement": "\\n*Texto:*\\n\\n[trecho original da prova]\\n\\n---\\nCom base no texto acima, assinale a alternativa correta.",
+              "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
+              "correctAnswerIndex": 1,
+              "comment": "Comentário detalhado justificando a resposta"
+            }
+            
+            Exemplo de questão sem texto de apoio:
+            {
+              "type": "TRUE_FALSE",
+              "statement": "Assertiva para julgamento.",
+              "correctAnswerIndex": 0,
+              "comment": "Comentário detalhado justificando a resposta"
+            }
+            """;
+
+    private static final String PROMPT_MULTIPLE_CHOICE = PROMPT_BASE + """
+            Gere exatamente {quantidade} questões de múltipla escolha com base no conteúdo fornecido pelo usuário.
+            
+            Estrutura de cada questão:
+            - "statement": enunciado claro, objetivo e compatível com provas oficiais.
+            - "options": exatamente 4 alternativas no formato "(A)", "(B)", "(C)", "(D)".
+            - "correctAnswerIndex": número inteiro de 0 a 3, indicando a alternativa correta.
+            - "comment": explicação técnica detalhada da resposta correta.
             
             Formato obrigatório de saída:
             [
@@ -75,48 +116,18 @@ public class GeminiService {
             ]
             """;
 
-    private static final String PROMPT_GENERATE_TRUE_FALSE = """
-            Você é um especialista em elaboração de questões para concursos públicos, com profundo conhecimento do estilo, do nível de dificuldade e dos padrões de cobrança da banca {banca}, especialmente no modelo CERTO ou ERRADO utilizado pelo CEBRASPE.
-            
-            Contexto do concurso (considere apenas se as informações forem fornecidas):
-            - Cargo: {cargo}
-            - Cidade: {cidade}
-            - Estado: {estado}
-            - Nível do concurso: {nivel} (médio ou superior)
-            - Orgão do concurso: {orgao} (para qual orgão o concurso será realizado)
-            
-            Caso alguma dessas informações não seja fornecida, desconsidere-a completamente.
-            
+    private static final String PROMPT_TRUE_FALSE = PROMPT_BASE + """
             Gere exatamente {quantidade} questões do tipo CERTO ou ERRADO com base no conteúdo fornecido pelo usuário.
             
-            Diretrizes obrigatórias:
-            - As questões devem seguir rigorosamente o modelo CEBRASPE (uma assertiva para julgamento).
-            - O nível deve ser alto, compatível com provas reais da banca {banca}.
-            - Adeque o grau de tecnicidade ao cargo e ao nível do concurso ({nivel}), quando informados.
-            - Sempre que possível, utilize assertivas que já tenham sido cobradas em concursos públicos anteriores.
-            - Caso não seja possível reproduzir uma assertiva real, crie uma inédita, porém MUITO semelhante ao estilo da banca {banca}, mantendo:
-              - linguagem técnica e formal
-              - alto nível de precisão conceitual
-              - pegadinhas conceituais comuns da banca
-              - afirmações absolutas, restritivas ou sutis quando aplicável
-            - Evite assertivas óbvias, introdutórias ou excessivamente genéricas.
-            - O campo "comment" deve obrigatoriamente conter a explicação técnica da resposta.
-            - use linguagem markdown no campo comment para organizar a explicação de forma didática.
-            
-            - NÃO inclua qualquer texto, saudação ou conclusão fora do JSON.
+            As questões devem seguir rigorosamente o modelo CEBRASPE (uma assertiva única para julgamento), mantendo:
+            - afirmações absolutas, restritivas ou com sutilezas conceituais quando aplicável
+            - alto nível de precisão, evitando assertivas óbvias ou excessivamente genéricas
             
             Estrutura de cada questão:
             - "statement": uma assertiva clara, objetiva e passível de julgamento como CERTO ou ERRADO.
-            - "correctAnswerIndex":
-              - 0 para CERTO
-              - 1 para ERRADO
-            
-            Regras de formatação:
-            - Retorne APENAS um JSON válido.
-            - NÃO utilize Markdown.
-            - NÃO inclua qualquer texto fora do JSON.
-            - NÃO utilize comentários.
-            - Sempre escreva em português do Brasil.
+            - "correctAnswerIndex": 0 para CERTO, 1 para ERRADO.
+            - "comment": explicação técnica detalhada da resposta correta.
+            - NÃO inclua o campo "options" em hipótese alguma. Questões TRUE_FALSE NÃO possuem alternativas.
             
             Formato obrigatório de saída:
             [
@@ -176,10 +187,7 @@ public class GeminiService {
 
 
     public GeminiService(RestClient.Builder builder) {
-        this.restClient = builder
-                .baseUrl("https://generativelanguage.googleapis.com")
-                .defaultHeader("Content-Type", "application/json")
-                .build();
+        this.restClient = builder.baseUrl("https://generativelanguage.googleapis.com").defaultHeader("Content-Type", "application/json").build();
     }
 
     public List<QuestionGenerateDTO> generateQuestions(PromptRequest request) {
@@ -190,12 +198,8 @@ public class GeminiService {
         String json = extractJsonArray(raw);
 
         try {
-            List<QuestionGenerateDTO> questions =
-                    objectMapper.readValue(
-                            json,
-                            new TypeReference<List<QuestionGenerateDTO>>() {
-                            }
-                    );
+            List<QuestionGenerateDTO> questions = objectMapper.readValue(json, new TypeReference<List<QuestionGenerateDTO>>() {
+            });
 
             validateQuestions(questions, request.type());
             return questions;
@@ -211,21 +215,11 @@ public class GeminiService {
     }
 
     private String buildPrompt(PromptRequest request) {
-        return getPromptByType(request.type())
-                + field("Banca", request.banca())
-                + field("Órgão", request.orgao())
-                + field("Cargo", request.cargo())
-                + field("Cidade", request.cidade())
-                + field("Estado", request.estado())
-                + field("Nível", request.nivel())
-                + "\nQuantidade: " + request.quantidade()
-                + "\n\nConteúdo base:\n" + request.prompt();
+        return getPromptByType(request.type()) + field("Banca", request.banca()) + field("Órgão", request.orgao()) + field("Cargo", request.cargo()) + field("Cidade", request.cidade()) + field("Estado", request.estado()) + field("Nível", request.nivel()) + "\nQuantidade: " + request.quantidade() + "\n\nConteúdo base:\n" + request.prompt();
     }
 
     private String field(String label, String value) {
-        return value == null || value.isBlank()
-                ? ""
-                : "\n" + label + ": " + value;
+        return value == null || value.isBlank() ? "" : "\n" + label + ": " + value;
     }
 
     private String truncateText(String prompt) {
@@ -260,21 +254,9 @@ public class GeminiService {
 
     private String doCall(String prompt) {
 
-        Map<String, Object> body = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(Map.of("text", prompt)))
-                )
-        );
+        Map<String, Object> body = Map.of("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
 
-        String response = restClient.post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/v1beta/models/gemini-2.5-flash:generateContent")
-                        .queryParam("key", apiKey)
-                        .build()
-                )
-                .body(body)
-                .retrieve()
-                .body(String.class);
+        String response = restClient.post().uri(uriBuilder -> uriBuilder.path("/v1beta/models/gemini-2.5-flash:generateContent").queryParam("key", apiKey).build()).body(body).retrieve().body(String.class);
 
         return extractText(response);
     }
@@ -295,15 +277,7 @@ public class GeminiService {
         try {
             JsonNode root = objectMapper.readTree(json);
 
-            return root
-                    .path("candidates")
-                    .get(0)
-                    .path("content")
-                    .path("parts")
-                    .get(0)
-                    .path("text")
-                    .asText()
-                    .trim();
+            return root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText().trim();
 
         } catch (Exception e) {
             throw new RuntimeException("Erro ao processar resposta do Gemini", e);
@@ -312,8 +286,8 @@ public class GeminiService {
 
     private String getPromptByType(QuestionType type) {
         return switch (type) {
-            case TRUE_FALSE -> PROMPT_GENERATE_TRUE_FALSE;
-            case MULTIPLE_CHOICE -> PROMPT_GENERATE;
+            case TRUE_FALSE -> PROMPT_TRUE_FALSE;
+            case MULTIPLE_CHOICE -> PROMPT_MULTIPLE_CHOICE;
         };
     }
 
