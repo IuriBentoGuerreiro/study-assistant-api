@@ -81,7 +81,7 @@ public class GeminiService {
             {
               "type": "MULTIPLE_CHOICE",
               "statement": "\\n*Texto:*\\n\\n[trecho original da prova]\\n\\n---\\nCom base no texto acima, assinale a alternativa correta.",
-              "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
+              "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4", "(E) Opção 5"],
               "correctAnswerIndex": 1,
               "comment": "Comentário detalhado justificando a resposta"
             }
@@ -100,8 +100,8 @@ public class GeminiService {
             
             Estrutura de cada questão:
             - "statement": enunciado claro, objetivo e compatível com provas oficiais.
-            - "options": exatamente 4 alternativas no formato "(A)", "(B)", "(C)", "(D)".
-            - "correctAnswerIndex": número inteiro de 0 a 3, indicando a alternativa correta.
+            - "options": exatamente 5 alternativas no formato "(A)", "(B)", "(C)", "(D)", (E).
+            - "correctAnswerIndex": número inteiro de 0 a 4, indicando a alternativa correta.
             - "comment": explicação técnica detalhada da resposta correta.
             
             Formato obrigatório de saída:
@@ -109,7 +109,7 @@ public class GeminiService {
               {
                 "type": "MULTIPLE_CHOICE",
                 "statement": "Pergunta aqui?",
-                "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4"],
+                "options": ["(A) Opção 1", "(B) Opção 2", "(C) Opção 3", "(D) Opção 4", "(E) Opção 5"],
                 "correctAnswerIndex": 1,
                 "comment": "Comentário detalhado justificando a resposta"
               }
@@ -305,7 +305,7 @@ public class GeminiService {
 
             switch (type) {
                 case MULTIPLE_CHOICE -> {
-                    if (q.options() == null || q.options().size() != 4) {
+                    if (q.options() == null || q.options().size() != 5) {
                         throw new RuntimeException("Questão de múltipla escolha inválida: " + q);
                     }
                     if (q.correctAnswerIndex() < 0 || q.correctAnswerIndex() > 3) {
