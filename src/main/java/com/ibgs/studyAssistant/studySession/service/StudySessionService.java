@@ -80,7 +80,6 @@ public class StudySessionService {
             Question question = new Question();
             question.setStatement(q.statement());
             question.setCorrectAnswerIndex(q.correctAnswerIndex());
-            question.setType(q.type());
             question.setStudySession(session);
             question.setComment(q.comment());
 
@@ -112,7 +111,6 @@ public class StudySessionService {
                         new QuestionResponse(
                                 q.getId(),
                                 q.getStatement(),
-                                q.getType(),
                                 q.getOptions() == null
                                         ? List.of()
                                         : q.getOptions().stream()
