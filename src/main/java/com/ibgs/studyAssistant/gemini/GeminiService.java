@@ -256,7 +256,7 @@ public class GeminiService {
 
         Map<String, Object> body = Map.of("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
 
-        String response = restClient.post().uri(uriBuilder -> uriBuilder.path("/v1beta/models/gemini-2.5-flash:generateContent").queryParam("key", apiKey).build()).body(body).retrieve().body(String.class);
+        String response = restClient.post().uri(uriBuilder -> uriBuilder.path("/v1beta/models/gemini-3.6-flash:generateContent").queryParam("key", apiKey).build()).body(body).retrieve().body(String.class);
 
         return extractText(response);
     }
